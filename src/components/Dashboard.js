@@ -191,7 +191,7 @@ const Dashboard = () => {
       }}
     >
       <Header />
-      <Container maxWidth="lg">
+      <Container maxWidth="false" sx={{ width: '100%', maxWidth: '1800px' }}>
         <Box sx={{ pt: 10 }}>
           <Paper
             id="dashboard-content"
