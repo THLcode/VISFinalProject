@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { UserProvider } from "./UserContext";
 
 const theme = createTheme();
 
@@ -11,7 +12,9 @@ root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <App />
+      <UserProvider>
+        <App />
+      </UserProvider>
     </ThemeProvider>
   </React.StrictMode>
 );
