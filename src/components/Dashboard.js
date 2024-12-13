@@ -36,40 +36,89 @@ const MENTAL_HEALTH_CONDITIONS = [
 // Constants for hierarchical features
 const FEATURE_TREE = [
   {
-    category: "ratio",
-    features: [],
-  },
-  {
-    category: "num_[key]_per_sec",
+    category: "nkeys_btw",
     features: [
-      "num_language_per_sec",
-      "num_backspace_per_sec",
-      "num_space_per_sec",
-      "num_shift_per_sec",
-      "num_enter_per_sec",
-      "num_punc_per_sec",
-      "num_special_per_sec",
-      "num_num_per_sec",
+      "backspaces", 
+      "spaces"
     ],
   },
   {
+    category: "ratio",
+    features: [
+      "language",
+      "backspace",
+      "space",
+      "shift",
+      "enter",
+      "punc",
+      "special",
+      "num"
+    ],
+  },
+  {
+    category: "num_per_sec",
+    features: [
+      "language",
+      "backspace",
+      "space",
+      "shift",
+      "enter",
+      "punc",
+      "special",
+      "num"
+    ],
+  },  
+  {
     category: "pause",
-    features: [],
+    features: [
+      "pause_3sec",
+      "pause_4sec",
+      "pause_5sec"
+    ],
   },
   {
     category: "pressure",
     features: [
-      "pressureMin_mean",
-      "pressureMin_std",
-      "pressureMax_mean",
-      "pressureMax_std",
-      "pressureAvg_mean",
-      "pressureAvg_std",
+      "pressureMin",
+      "pressureMax",
+      "pressureAvg"
     ],
   },
   {
     category: "area",
-    features: [],
+    features: [
+      "areaMin", 
+      "areaMax",
+      "areaAvg"
+    ],
+  },
+  {
+    category: "streak",
+    features: [
+      "streak_3",
+      "streak_4",
+      "streak_5"
+    ],
+  },
+  {
+    category: "graph",
+    features: [
+      "trigraph",
+      "quadragraph",
+      "pentagraph",
+      "hexagraph",
+      "heptagraph",
+      "octagraph"
+    ],
+  },
+  {
+    category: "others",
+    features: [
+      "ppd",
+      "hd",
+      "typing_time",
+      "key_per_sec"
+    ],
   },
 ];
 
