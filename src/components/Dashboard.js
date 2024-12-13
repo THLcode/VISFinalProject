@@ -20,6 +20,8 @@ import Header from "./Header";
 import html2canvas from "html2canvas";
 import result1 from "../assets/result1.png";
 import result2 from "../assets/result2.png";
+import ScatterPlot from "./Scatterplot.js";
+
 
 const MENTAL_HEALTH_CONDITIONS = [
   { id: "igds", label: "IGDS" },
@@ -106,7 +108,7 @@ const MentalHealthSection = ({ title, conditions, onChange, values }) => (
       border: "1px solid #ddd",
       borderRadius: 2,
       width: "100%",
-      height: "100%",
+      height: "65%",
       display: "flex",
       flexDirection: "column",
     }}
@@ -164,14 +166,30 @@ const Dashboard = () => {
   };
 
   // mean/std 선택 로직
-  const handleFeatureClick = (feature, statistic) => {
-    const featureKey = `${feature}_${statistic}`;
-    setSelectedFeatures((prev) =>
-      prev.includes(featureKey)
-        ? prev.filter((f) => f !== featureKey)
-        : [...prev, featureKey]
-    );
+  const handleFeatureClick = (category, feature, stat) => {
+    setSelectedFeatures((prev) => {
+      const existingIndex = prev.findIndex(
+        (item) =>
+          item.category === category &&
+          item.feature === feature &&
+          item.stat === stat
+      );
+  
+      if (existingIndex > -1) {
+        const newArray = [...prev];
+        newArray.splice(existingIndex, 1);
+        return newArray;
+      }
+  
+      let newArray = [...prev];
+      if (newArray.length === 2) {
+        newArray.shift();
+      }
+      newArray.push({ category, feature, stat });
+      return newArray;
+    });
   };
+  
 
   const handleIdClick = (id) => {
     setSelectedId(id === selectedId ? null : id);
@@ -235,7 +253,7 @@ const Dashboard = () => {
                   sx={{
                     display: "flex",
                     flexDirection: "column",
-                    height: "100%",
+                    height: "80%",
                     gap: 2,
                   }}
                 >
@@ -303,23 +321,22 @@ const Dashboard = () => {
                           <AccordionDetails>
                             {group.features.map((feature) => (
                               <Accordion key={feature}>
-                                <AccordionSummary
-                                  expandIcon={<ExpandMoreIcon />}
-                                >
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                                   {feature}
                                 </AccordionSummary>
                                 <AccordionDetails>
                                   <Button
                                     variant={
-                                      selectedFeatures.includes(
-                                        `${feature}_mean`
+                                      selectedFeatures.some(
+                                        (item) =>
+                                          item.category === group.category &&
+                                          item.feature === feature &&
+                                          item.stat === "mean"
                                       )
                                         ? "contained"
                                         : "outlined"
                                     }
-                                    onClick={() =>
-                                      handleFeatureClick(feature, "mean")
-                                    }
+                                    onClick={() => handleFeatureClick(group.category, feature, "mean")}
                                     sx={{
                                       mb: 1,
                                       width: "100%",
@@ -330,15 +347,16 @@ const Dashboard = () => {
                                   </Button>
                                   <Button
                                     variant={
-                                      selectedFeatures.includes(
-                                        `${feature}_std`
+                                      selectedFeatures.some(
+                                        (item) =>
+                                          item.category === group.category &&
+                                          item.feature === feature &&
+                                          item.stat === "std"
                                       )
                                         ? "contained"
                                         : "outlined"
                                     }
-                                    onClick={() =>
-                                      handleFeatureClick(feature, "std")
-                                    }
+                                    onClick={() => handleFeatureClick(group.category, feature, "std")}
                                     sx={{
                                       mb: 1,
                                       width: "100%",
@@ -366,7 +384,7 @@ const Dashboard = () => {
               {/* Main Content */}
               <Grid item xs={12} md={10} sx={{ height: "100%" }}>
                 <Grid container spacing={2} sx={{ height: "100%" }}>
-                  <Grid item xs={12} sx={{ height: "50%" }}>
+                  <Grid item xs={12} sx={{ height: "20%" }}>
                     <Grid container spacing={2} sx={{ height: "100%" }}>
                       <Grid item xs={12} md={4}>
                         <MentalHealthSection
@@ -383,7 +401,7 @@ const Dashboard = () => {
                             p: 2,
                             border: "1px solid #ddd",
                             borderRadius: 2,
-                            height: "100%",
+                            height: "65%",
                             display: "flex",
                             flexDirection: "column",
                           }}
@@ -429,26 +447,24 @@ const Dashboard = () => {
                             border: "1px solid #ddd",
                             borderRadius: 2,
                             height: "100%",
+                            display: "flex", // Flexbox 사용
+                            flexDirection: "column", // 세로 방향 배치
                           }}
                         >
                           <Typography variant="h6" gutterBottom>
-                            Chart 1
+                            ScatterPlot
                           </Typography>
                           <Box
                             sx={{
-                              flex: 1,
-                              position: "relative",
-                              overflow: "hidden",
+                              flex: 1, // 남은 공간을 ScatterPlot에 할당
+                              position: "relative", // 위치 조정을 위해 relative 설정
                             }}
                           >
-                            <img
-                              src={result1}
-                              alt="Chart 1"
+                            <ScatterPlot
+                              selectedFeatures={selectedFeatures}
                               style={{
                                 width: "100%",
                                 height: "100%",
-                                objectFit: "contain",
-                                display: "block",
                               }}
                             />
                           </Box>
