@@ -156,7 +156,7 @@ const MentalHealthSection = ({ title, conditions, onChange, values }) => (
 );
 
 const Dashboard = () => {
-  const [comparisonMode, setComparisonMode] = useState("개인vsGroup");
+  const [comparisonMode, setComparisonMode] = useState("GroupvsGroup");
   const [selectedId, setSelectedId] = useState(null);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [mentalHealth, setMentalHealth] = useState({});
@@ -278,17 +278,17 @@ const Dashboard = () => {
                         onChange={handleModeChange}
                       >
                         <FormControlLabel
-                          value="개인vs개인"
+                          value="OnevsOne"
                           control={<Radio />}
                           label="개인 vs 개인"
                         />
                         <FormControlLabel
-                          value="개인vsGroup"
+                          value="OnevsGroup"
                           control={<Radio />}
                           label="개인 vs 그룹"
                         />
                         <FormControlLabel
-                          value="그룹vs그룹"
+                          value="GroupvsGroup"
                           control={<Radio />}
                           label="그룹 vs 그룹"
                         />
