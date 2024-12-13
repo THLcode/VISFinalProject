@@ -21,7 +21,6 @@ import html2canvas from "html2canvas";
 import result1 from "../assets/result1.png";
 import result2 from "../assets/result2.png";
 
-// Constants for mental health conditions
 const MENTAL_HEALTH_CONDITIONS = [
   { id: "igds", label: "IGDS" },
   { id: "stai", label: "STAI-X-1" },
@@ -33,14 +32,10 @@ const MENTAL_HEALTH_CONDITIONS = [
   { id: "pq16", label: "PQ-16" },
 ];
 
-// Constants for hierarchical features
 const FEATURE_TREE = [
   {
     category: "nkeys_btw",
-    features: [
-      "backspaces", 
-      "spaces"
-    ],
+    features: ["backspaces", "spaces"],
   },
   {
     category: "ratio",
@@ -52,7 +47,7 @@ const FEATURE_TREE = [
       "enter",
       "punc",
       "special",
-      "num"
+      "num",
     ],
   },
   {
@@ -65,40 +60,24 @@ const FEATURE_TREE = [
       "enter",
       "punc",
       "special",
-      "num"
+      "num",
     ],
   },  
   {
     category: "pause",
-    features: [
-      "pause_3sec",
-      "pause_4sec",
-      "pause_5sec"
-    ],
+    features: ["pause_3sec", "pause_4sec", "pause_5sec"],
   },
   {
     category: "pressure",
-    features: [
-      "pressureMin",
-      "pressureMax",
-      "pressureAvg"
-    ],
+    features: ["pressureMin", "pressureMax", "pressureAvg"],
   },
   {
     category: "area",
-    features: [
-      "areaMin", 
-      "areaMax",
-      "areaAvg"
-    ],
+    features: ["areaMin", "areaMax", "areaAvg"],
   },
   {
     category: "streak",
-    features: [
-      "streak_3",
-      "streak_4",
-      "streak_5"
-    ],
+    features: ["streak_3", "streak_4", "streak_5"],
   },
   {
     category: "graph",
@@ -108,24 +87,17 @@ const FEATURE_TREE = [
       "pentagraph",
       "hexagraph",
       "heptagraph",
-      "octagraph"
+      "octagraph",
     ],
   },
   {
     category: "others",
-    features: [
-      "ppd",
-      "hd",
-      "typing_time",
-      "key_per_sec"
-    ],
+    features: ["ppd", "hd", "typing_time", "key_per_sec"],
   },
 ];
 
-// Constants for sample IDs
 const SAMPLE_IDS = ["137", "458", "647", "723", "912", "1344", "1532", "2051"];
 
-// Component for the mental health conditions section
 const MentalHealthSection = ({ title, conditions, onChange, values }) => (
   <Paper
     elevation={1}
@@ -191,11 +163,13 @@ const Dashboard = () => {
     setComparisonMode(event.target.value);
   };
 
-  const handleFeatureClick = (feature) => {
+  // mean/std 선택 로직
+  const handleFeatureClick = (feature, statistic) => {
+    const featureKey = `${feature}_${statistic}`;
     setSelectedFeatures((prev) =>
-      prev.includes(feature)
-        ? prev.filter((f) => f !== feature)
-        : [...prev, feature]
+      prev.includes(featureKey)
+        ? prev.filter((f) => f !== featureKey)
+        : [...prev, featureKey]
     );
   };
 
@@ -240,7 +214,7 @@ const Dashboard = () => {
       }}
     >
       <Header />
-      <Container maxWidth="false" sx={{ width: '100%', maxWidth: '1800px' }}>
+      <Container maxWidth="false" sx={{ width: "100%", maxWidth: "1800px" }}>
         <Box sx={{ pt: 10 }}>
           <Paper
             id="dashboard-content"
@@ -328,22 +302,53 @@ const Dashboard = () => {
                           </AccordionSummary>
                           <AccordionDetails>
                             {group.features.map((feature) => (
-                              <Button
-                                key={feature}
-                                variant={
-                                  selectedFeatures.includes(feature)
-                                    ? "contained"
-                                    : "outlined"
-                                }
-                                onClick={() => handleFeatureClick(feature)}
-                                sx={{
-                                  mb: 1,
-                                  width: "100%",
-                                  textAlign: "left",
-                                }}
-                              >
-                                {feature}
-                              </Button>
+                              <Accordion key={feature}>
+                                <AccordionSummary
+                                  expandIcon={<ExpandMoreIcon />}
+                                >
+                                  {feature}
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                  <Button
+                                    variant={
+                                      selectedFeatures.includes(
+                                        `${feature}_mean`
+                                      )
+                                        ? "contained"
+                                        : "outlined"
+                                    }
+                                    onClick={() =>
+                                      handleFeatureClick(feature, "mean")
+                                    }
+                                    sx={{
+                                      mb: 1,
+                                      width: "100%",
+                                      textAlign: "left",
+                                    }}
+                                  >
+                                    mean
+                                  </Button>
+                                  <Button
+                                    variant={
+                                      selectedFeatures.includes(
+                                        `${feature}_std`
+                                      )
+                                        ? "contained"
+                                        : "outlined"
+                                    }
+                                    onClick={() =>
+                                      handleFeatureClick(feature, "std")
+                                    }
+                                    sx={{
+                                      mb: 1,
+                                      width: "100%",
+                                      textAlign: "left",
+                                    }}
+                                  >
+                                    std
+                                  </Button>
+                                </AccordionDetails>
+                              </Accordion>
                             ))}
                             {group.features.length === 0 && (
                               <Typography variant="body2" color="textSecondary">
