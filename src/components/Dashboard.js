@@ -866,7 +866,7 @@ import Header from "./Header";
 import html2canvas from "html2canvas";
 import ScatterPlot from "./Scatterplot.js";
 import HistogramPlot from "./HistogramPlot.js";
-import data from "../data/phenotyping_data_with_label_v1.json";
+import data from "../data/phenotyping_data_with_label_v2.json";
 import { UserContext } from "../UserContext";
 
 // 박스에 제목 느낌을 주는 컴포넌트
