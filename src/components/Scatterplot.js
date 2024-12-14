@@ -55,7 +55,30 @@ const ScatterPlot = ({ groupData = [], selectedFeatures, comparisonMode, onBrush
         .attr("fill", group.color)
         .attr("opacity", 0.5);
     });
-    
+    const legend = svg.append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(${width - margin - 50}, ${margin})`); // 레전드 위치 조정
+
+    groupData.forEach((group, i) => {
+      const legendRow = legend.append("g")
+        .attr("class", "legend-row")
+        .attr("transform", `translate(0, ${i * 20})`); // 각 행 간격
+
+      // 색상 사각형
+      legendRow.append("rect")
+        .attr("width", 15)
+        .attr("height", 15)
+        .attr("fill", group.color)
+        .attr("opacity", 0.5);
+
+      // 텍스트
+      legendRow.append("text")
+        .attr("x", 20)
+        .attr("y", 12)
+        .attr("fill", "black")
+        .style("font-size", "12px")
+        .text(group.groupId || `Group ${i + 1}`); // 그룹 이름 표시
+    });
 
     // Brush
     if (onBrush) {
