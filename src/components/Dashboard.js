@@ -341,19 +341,28 @@ const Dashboard = () => {
     ];
   } else if (comparisonMode === "OnevsOne") {
     const myStudent = data[myStudentId];
-    const myData = preparePlotData([myStudent], selectedFeatures);
-
-    // savedTarget 대상자 필터링 (단일 student_id 가정)
+    let myData = [];
     let targetData = [];
-    if (savedTarget) {
-      const targetId = `student${savedTarget}`;
-      const targetStudent = data[targetId];
-      targetData = preparePlotData([targetStudent], selectedFeatures);
+    if (myStudent && selectedFeatures.length === 2) {
+      myData = preparePlotData([myStudent], selectedFeatures);
     }
+    if (savedTarget && selectedFeatures.length === 2) {
+      if (savedTarget <= targetStudents.length) {
+        const chosenStudent = targetStudents[savedTarget - 1]; 
+        // 이 학생에 대해 preparePlotData 수행
+        targetData = preparePlotData([chosenStudent], selectedFeatures);
+      } else {
+        // 범위를 벗어나면 빈 배열 유지 or 에러 처리
+        targetData = [];
+      }
+    }
+  
     scatterGroupData = [
       { data: myData, color: 'red', radius: 10 },
       { data: targetData, color: 'steelblue' }
     ];
+    console.log("scatterGroupData")
+    console.log(scatterGroupData)
   }
 
   // scatterplot에서 brush 이벤트가 발생하면 brushedPoints 업데이트
@@ -516,18 +525,6 @@ const Dashboard = () => {
                             </Typography>
                           </Box>
                           <Box sx={{ overflowY: "auto", flex: 1 }}>
-                            {/* <Typography
-                              variant="body2"
-                              sx={{
-                                mt: 2,
-                                mb: 1,
-                                fontWeight: "bold",
-                                display: "flex",
-                                justifyContent: "center",
-                              }}
-                            >
-                              1~300중에 비교하실 대상을 입력하세요
-                            </Typography> */}
                             <TextField
                               type="number"
                               value={customTarget}

@@ -9,7 +9,7 @@ const HistogramPlot = ({ brushedData, myValue, comparisonMode }) => {
     svg.selectAll("*").remove();
 
     const width = 600;
-    const height = 600;
+    const height = 550;
     const margin = 40;
     const innerWidth = width - margin * 2;
     const innerHeight = height - margin * 2;
