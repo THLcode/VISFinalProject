@@ -74,7 +74,7 @@ const ScatterPlot = ({
                 return sizeScale(diseaseCount);
               })
         .attr("fill", group.color)
-        .attr("opacity", 0.7);
+        .attr("opacity", 0.4);
 
       // 마우스오버 툴팁(간단히)
       circles.on("mouseover", (event, d) => {

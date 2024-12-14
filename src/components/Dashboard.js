@@ -1205,18 +1205,20 @@ const Dashboard = () => {
 
   let scatterGroupData = [];
   if (comparisonMode === "GroupvsGroup") {
-    const group1Filtered = filterDataByMentalHealth(mentalHealthGroup1);
-    const group2Filtered = filterDataByMentalHealth(mentalHealthGroup2);
-    const group1Data = preparePlotData(
-      group1Filtered,
-      selectedFeatures,
-      mentalHealthGroup1
-    );
-    const group2Data = preparePlotData(
-      group2Filtered,
-      selectedFeatures,
-      mentalHealthGroup2
-    );
+    const selectedConditionsGroup1 = Object.keys(mentalHealthGroup1).filter((k) => mentalHealthGroup1[k]);
+    const selectedConditionsGroup2 = Object.keys(mentalHealthGroup2).filter((k) => mentalHealthGroup2[k]);
+  
+    let group1Filtered = selectedConditionsGroup1.length === 0 
+      ? Object.values(data)
+      : filterDataByMentalHealth(mentalHealthGroup1);
+  
+    let group2Filtered = selectedConditionsGroup2.length === 0 
+      ? Object.values(data)
+      : filterDataByMentalHealth(mentalHealthGroup2);
+  
+    const group1Data = preparePlotData(group1Filtered, selectedFeatures, mentalHealthGroup1);
+    const group2Data = preparePlotData(group2Filtered, selectedFeatures, mentalHealthGroup2);
+  
     scatterGroupData = [
       { data: group1Data, color: "steelblue", groupId: "group1" },
       { data: group2Data, color: "orange", groupId: "group2" },
@@ -1227,7 +1229,6 @@ const Dashboard = () => {
     );
     let groupFiltered = [];
     if (selectedConditions.length === 0) {
-      // 아무것도 선택 안 했으면 전체 학생 데이터 사용
       groupFiltered = Object.values(data);
     } else {
       groupFiltered = filterDataByMentalHealth(mentalHealthGroup1);
