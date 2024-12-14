@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Box,
   Paper,
@@ -22,6 +22,7 @@ import html2canvas from "html2canvas";
 import ScatterPlot from "./Scatterplot.js";
 import HistogramPlot from "./HistogramPlot.js";
 import data from "../data/phenotyping_data_with_label_v1.json";
+import { UserContext } from '../UserContext';
 // 박스에 제목 느낌을 주는 컴포넌트 (필요 없으면 제거해도 됩니다)
 const TitleBox = ({ children }) => (
   <Box
@@ -183,7 +184,9 @@ const Dashboard = () => {
   const [mentalHealth, setMentalHealth] = useState({});
   const [mentalHealthGroup1, setMentalHealthGroup1] = useState({});
   const [mentalHealthGroup2, setMentalHealthGroup2] = useState({});
-  const myStudentId = "student12067"; //일단 이걸로해!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const { user } = useContext(UserContext); // UserContext에서 user를 가져옴
+  const myStudentId = user?.student_id || ""; // user 객체에서 student_id를 가져옴
+  console.log(myStudentId)
 
   // 개인 vs 개인에서 직접 입력할 숫자를 저장할 상태
   const [customTarget, setCustomTarget] = useState("");

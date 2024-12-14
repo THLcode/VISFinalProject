@@ -28,7 +28,7 @@ const Header = () => {
           </Box>
           {user ? (
             <>
-              <Box sx={{ mr: 2 }}>Welcome, {user.email}</Box>
+              <Box sx={{ mr: 2 }}>Welcome, {user.student_id}</Box>
               <Button color="inherit" onClick={handleLogout}>
                 Logout
               </Button>
