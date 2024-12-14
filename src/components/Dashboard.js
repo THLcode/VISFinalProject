@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -115,7 +115,7 @@ const FEATURE_TREE = [
   },
 ];
 // MentalHealthSection 컴포넌트
-const MentalHealthSection = ({ title, conditions, onChange, values }) => (
+const MentalHealthSection = ({ title, conditions, onChange, values, disabled=false }) => (
   <Paper
     elevation={1}
     sx={{
@@ -139,7 +139,7 @@ const MentalHealthSection = ({ title, conditions, onChange, values }) => (
     <Box sx={{ flexGrow: 1, overflowY: "auto", minHeight: 0 }}>
       <Grid container spacing={1}>
         <Grid item xs={6}>
-          {conditions.slice(0, 4).map((condition) => (
+        {conditions.slice(0, 4).map((condition) => (
             <FormControlLabel
               key={condition.id}
               control={
@@ -147,6 +147,7 @@ const MentalHealthSection = ({ title, conditions, onChange, values }) => (
                   checked={values?.[condition.id] || false}
                   onChange={onChange}
                   name={condition.id}
+                  disabled={disabled}
                 />
               }
               label={condition.label}
@@ -163,6 +164,7 @@ const MentalHealthSection = ({ title, conditions, onChange, values }) => (
                   checked={values?.[condition.id] || false}
                   onChange={onChange}
                   name={condition.id}
+                  disabled={disabled}
                 />
               }
               label={condition.label}
@@ -174,13 +176,14 @@ const MentalHealthSection = ({ title, conditions, onChange, values }) => (
     </Box>
   </Paper>
 );
+
 const Dashboard = () => {
   const [comparisonMode, setComparisonMode] = useState("OnevsOne");
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [mentalHealth, setMentalHealth] = useState({});
   const [mentalHealthGroup1, setMentalHealthGroup1] = useState({});
   const [mentalHealthGroup2, setMentalHealthGroup2] = useState({});
-  const myStudentId = "student11002"; //일단 이걸로해!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const myStudentId = "student12067"; //일단 이걸로해!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   // 개인 vs 개인에서 직접 입력할 숫자를 저장할 상태
   const [customTarget, setCustomTarget] = useState("");
@@ -197,6 +200,17 @@ const Dashboard = () => {
     const { name, checked } = event.target;
     setMentalHealthGroup2((prev) => ({ ...prev, [name]: checked }));
   };
+
+  useEffect(() => {
+    const myStudent = data[myStudentId];
+    if (myStudent) {
+      const initMentalHealth = {};
+      Object.keys(myStudent.labels).forEach((cond) => {
+        initMentalHealth[cond] = myStudent.labels[cond] === 1; 
+      });
+      setMentalHealth(initMentalHealth);
+    }
+  }, [myStudentId]);
 
   // 그룹 조건에 맞게 학생 데이터를 필터링하는 함수
   const filterDataByMentalHealth = (mentalHealthObj) => {
@@ -240,24 +254,28 @@ const Dashboard = () => {
   };
 
   const handleMentalHealthChange = (event) => {
-    const { name, checked } = event.target;
-    setMentalHealth((prev) => ({
-      ...prev,
-      [name]: checked,
-    }));
+    // const { name, checked } = event.target;
+    // setMentalHealth((prev) => ({
+    //   ...prev,
+    //   [name]: checked,
+    // }));
   };
 
   const handleCustomTargetChange = (e) => {
     setCustomTarget(e.target.value);
   };
 
+  let targetConditions = mentalHealthGroup2; // 혹은 대상자 섹션용 별도 state 필요
+  const targetStudents = filterDataByMentalHealth(targetConditions);
+  const maxCount = targetStudents.length > 0 ? targetStudents.length : 1;
+  
   const handleConfirmTarget = () => {
     const val = parseInt(customTarget, 10);
-    if (val >= 1 && val <= 300) {
+    if (val >= 1 && val <= maxCount) {
       setSavedTarget(val);
       alert(`선택하신 대상: ${val}`);
     } else {
-      alert("1~300 사이의 숫자를 입력하세요.");
+      alert(`1~${maxCount} 사이의 숫자를 입력하세요.`);
     }
   };
 
@@ -302,10 +320,9 @@ const Dashboard = () => {
     const group2Data = preparePlotData(group2Filtered, selectedFeatures);
     scatterGroupData = [
       { data: group1Data, color: 'steelblue' },
-      { data: group2Data, color: 'green' }
+      { data: group2Data, color: 'black' }
     ];
   } else if (comparisonMode === "OnevsGroup") {
-    // 그룹 필터링 (예: 그룹 조건이 mentalHealth 사용)
     const groupFiltered = filterDataByMentalHealth(mentalHealthGroup1); // 그룹1 역할 재사용 혹은 mentalHealth를 그룹조건으로 활용
     const groupData = preparePlotData(groupFiltered, selectedFeatures);
     // "나"의 단일 포인트
@@ -354,7 +371,9 @@ const Dashboard = () => {
   let targetSelectXs = 4;
   let myBoxTitle = "나";
   let groupBoxTitle = "그룹";
-
+  const myPointX = (comparisonMode === "OnevsGroup" && scatterGroupData[1].data.length > 0)
+    ? scatterGroupData[1].data[0].x
+    : null;
   if (comparisonMode === "OnevsGroup") {
     showTargetSelect = false;
     myBoxXs = 5;
@@ -366,6 +385,7 @@ const Dashboard = () => {
     myBoxTitle = "그룹1";
     groupBoxTitle = "그룹2";
   }
+  
 
   return (
     <Box
@@ -464,8 +484,9 @@ const Dashboard = () => {
                         <MentalHealthSection
                           title="나"
                           conditions={MENTAL_HEALTH_CONDITIONS}
-                          onChange={handleMentalHealthChange}
+                          onChange={() => {}} // 바꿀 수 없으니 빈 핸들러
                           values={mentalHealth}
+                          disabled={true} // 이 props를 추가
                         />
                       </Grid>
 
@@ -498,7 +519,7 @@ const Dashboard = () => {
                             </Typography>
                           </Box>
                           <Box sx={{ overflowY: "auto", flex: 1 }}>
-                            <Typography
+                            {/* <Typography
                               variant="body2"
                               sx={{
                                 mt: 2,
@@ -509,13 +530,13 @@ const Dashboard = () => {
                               }}
                             >
                               1~300중에 비교하실 대상을 입력하세요
-                            </Typography>
+                            </Typography> */}
                             <TextField
                               type="number"
                               value={customTarget}
                               onChange={handleCustomTargetChange}
-                              label="1~300 사이의 숫자 입력"
-                              inputProps={{ min: 1, max: 300 }}
+                              label={`1~${maxCount} 사이의 숫자 입력`} // maxCount 반영
+                              inputProps={{ min: 1, max: maxCount }}
                               fullWidth
                               sx={{ mb: 2 }}
                             />
@@ -548,8 +569,8 @@ const Dashboard = () => {
                         <MentalHealthSection
                           title="대상자"
                           conditions={MENTAL_HEALTH_CONDITIONS}
-                          onChange={() => {}}
-                          values={{}}
+                          onChange={handleGroup2Change} // 대상자 섹션 상태 관리
+                          values={mentalHealthGroup2}
                         />
                       </Grid>
                     </>
@@ -557,13 +578,14 @@ const Dashboard = () => {
 
                   {comparisonMode === "OnevsGroup" && (
                     <>
-                      {/* 나 */}
+                      {/* 나: disabled 처리 */}
                       <Grid item xs={5} sx={{ height: "100%" }}>
                         <MentalHealthSection
                           title="나"
                           conditions={MENTAL_HEALTH_CONDITIONS}
-                          onChange={handleMentalHealthChange}
+                          onChange={() => {}} // 변경 불가
                           values={mentalHealth}
+                          disabled={true}
                         />
                       </Grid>
 
@@ -766,7 +788,7 @@ const Dashboard = () => {
                     >
                       {/* 제목 제거 → HistogramPlot */}
                       <Box sx={{ flex: 1, position: "relative" }}>
-                        <HistogramPlot brushedData={brushedPoints} />
+                        <HistogramPlot brushedData={brushedPoints} myValue={myPointX}/>
                       </Box>
                     </Paper>
                   </Grid>

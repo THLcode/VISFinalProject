@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import * as d3 from "d3";
 
-const HistogramPlot = ({ brushedData }) => {
+const HistogramPlot = ({ brushedData, myValue }) => {
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -69,6 +69,20 @@ const HistogramPlot = ({ brushedData }) => {
       .attr("height", (d) => margin + innerHeight - yScale(d.length))
       .attr("fill", "steelblue")
       .attr("opacity", 0.7);
+
+    if (myValue != null) {
+      const lineX = xScale(myValue);
+      if (!isNaN(lineX)) {
+        svg.append("line")
+          .attr("x1", lineX)
+          .attr("x2", lineX)
+          .attr("y1", margin)
+          .attr("y2", margin + innerHeight)
+          .attr("stroke", "red")
+          .attr("stroke-width", 2)
+          .attr("opacity", 0.9);
+      }
+    }
   }, [brushedData]);
 
   return <svg ref={svgRef} />;
