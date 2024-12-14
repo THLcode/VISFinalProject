@@ -186,7 +186,6 @@ const Dashboard = () => {
   const [mentalHealthGroup2, setMentalHealthGroup2] = useState({});
   const { user } = useContext(UserContext); // UserContext에서 user를 가져옴
   const myStudentId = user?.student_id || ""; // user 객체에서 student_id를 가져옴
-  console.log(myStudentId)
 
   // 개인 vs 개인에서 직접 입력할 숫자를 저장할 상태
   const [customTarget, setCustomTarget] = useState("");
@@ -324,7 +323,14 @@ const Dashboard = () => {
       { data: group2Data, color: 'orange', groupId: 'group2' }
     ];
   } else if (comparisonMode === "OnevsGroup") {
-    const groupFiltered = filterDataByMentalHealth(mentalHealthGroup1); // 그룹1 역할 재사용 혹은 mentalHealth를 그룹조건으로 활용
+    const selectedConditions = Object.keys(mentalHealthGroup1).filter(k => mentalHealthGroup1[k]);
+    let groupFiltered = [];
+    if (selectedConditions.length === 0) {
+      // 아무것도 선택 안 했으면 전체 학생 데이터 사용
+      groupFiltered = Object.values(data);
+    } else {
+      groupFiltered = filterDataByMentalHealth(mentalHealthGroup1);
+    }
     const groupData = preparePlotData(groupFiltered, selectedFeatures);
     // "나"의 단일 포인트
     // 나의 데이터는 별도 필터링 없이 student_id = myStudentId로 특정
