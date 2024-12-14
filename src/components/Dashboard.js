@@ -359,6 +359,34 @@ const Dashboard = () => {
   );
 
   if (comparisonMode === "GroupvsGroup") {
+    const selectedConditionsGroup1 = Object.keys(mentalHealthGroup1).filter(
+      (k) => mentalHealthGroup1[k]
+    );
+    const selectedConditionsGroup2 = Object.keys(mentalHealthGroup2).filter(
+      (k) => mentalHealthGroup2[k]
+    );
+
+    let group1Filtered =
+      selectedConditionsGroup1.length === 0
+        ? Object.values(data)
+        : filterDataByMentalHealth(mentalHealthGroup1);
+
+    let group2Filtered =
+      selectedConditionsGroup2.length === 0
+        ? Object.values(data)
+        : filterDataByMentalHealth(mentalHealthGroup2);
+
+    const group1Data = preparePlotData(
+      group1Filtered,
+      selectedFeatures,
+      mentalHealthGroup1
+    );
+    const group2Data = preparePlotData(
+      group2Filtered,
+      selectedFeatures,
+      mentalHealthGroup2
+    );
+
     scatterGroupData = [
       { data: group1Data, color: "steelblue", groupId: "group1" },
       { data: group2Data, color: "orange", groupId: "group2" },
