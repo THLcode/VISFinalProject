@@ -1,842 +1,4 @@
-// import React, { useState, useEffect, useContext } from "react";
-// import {
-//   Box,
-//   Paper,
-//   Grid,
-//   Radio,
-//   RadioGroup,
-//   FormControlLabel,
-//   FormControl,
-//   Checkbox,
-//   Typography,
-//   Button,
-//   Container,
-//   Accordion,
-//   AccordionSummary,
-//   AccordionDetails,
-//   TextField,
-// } from "@mui/material";
-// import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-// import Header from "./Header";
-// import html2canvas from "html2canvas";
-// import ScatterPlot from "./Scatterplot.js";
-// import HistogramPlot from "./HistogramPlot.js";
-// import data from "../data/phenotyping_data_with_label_v1.json";
-// import { UserContext } from "../UserContext";
-// // 박스에 제목 느낌을 주는 컴포넌트 (필요 없으면 제거해도 됩니다)
-// const TitleBox = ({ children }) => (
-//   <Box
-//     sx={{
-//       backgroundColor: "#f0f0f0",
-//       border: "2px solid #ccc",
-//       borderRadius: 1,
-//       textAlign: "center",
-//       mb: 1,
-//       py: 1,
-//     }}
-//   >
-//     <Typography variant="h6" sx={{ m: 0, fontWeight: "bold" }}>
-//       {children}
-//     </Typography>
-//   </Box>
-// );
-// // 정신건강 체크리스트
-// const MENTAL_HEALTH_CONDITIONS = [
-//   { id: "IGDS", label: "IGDS" },
-//   { id: "STAI-X-1", label: "STAI-X-1" },
-//   { id: "PHQ-9", label: "PHQ-9" },
-//   { id: "BIS-15", label: "BIS-15" },
-//   { id: "BPAQ", label: "BPAQ" },
-//   { id: "ASRS-V1.1", label: "ASRS-V1.1" },
-//   { id: "Y-BOCS", label: "Y-BOCS" },
-//   { id: "PQ-16", label: "PQ-16" },
-// ];
-// // 계층 구조 Feature 목록
-// const FEATURE_TREE = [
-//   {
-//     category: "nkeys_btw",
-//     features: ["backspaces", "spaces"],
-//   },
-//   {
-//     category: "ratio",
-//     features: [
-//       "language",
-//       "backspace",
-//       "space",
-//       "shift",
-//       "enter",
-//       "punc",
-//       "special",
-//       "num",
-//     ],
-//   },
-//   {
-//     category: "num_per_sec",
-//     features: [
-//       "language",
-//       "backspace",
-//       "space",
-//       "shift",
-//       "enter",
-//       "punc",
-//       "special",
-//       "num",
-//     ],
-//   },
-//   {
-//     category: "pause",
-//     features: ["pause_3sec", "pause_4sec", "pause_5sec"],
-//   },
-//   {
-//     category: "pressure",
-//     features: ["pressureMin", "pressureMax", "pressureAvg"],
-//   },
-//   {
-//     category: "area",
-//     features: ["areaMin", "areaMax", "areaAvg"],
-//   },
-//   {
-//     category: "streak",
-//     features: ["streak_3", "streak_4", "streak_5"],
-//   },
-//   {
-//     category: "graph",
-//     features: [
-//       "trigraph",
-//       "quadragraph",
-//       "pentagraph",
-//       "hexagraph",
-//       "heptagraph",
-//       "octagraph",
-//     ],
-//   },
-//   {
-//     category: "others",
-//     features: ["ppd", "hd", "typing_time", "key_per_sec"],
-//   },
-// ];
-// // MentalHealthSection 컴포넌트
-// const MentalHealthSection = ({
-//   title,
-//   conditions,
-//   onChange,
-//   values,
-//   disabled = false,
-// }) => (
-//   <Paper
-//     elevation={1}
-//     sx={{
-//       p: 2,
-//       border: "1px solid #ddd",
-//       borderRadius: 2,
-//       width: "100%",
-//       height: "100%",
-//       overflow: "hidden",
-//       display: "flex",
-//       flexDirection: "column",
-//       fontSize: {
-//         xs: "0.75rem",
-//         sm: "0.8rem",
-//         md: "0.9rem",
-//         lg: "1rem",
-//       },
-//     }}
-//   >
-//     <TitleBox>{title}</TitleBox>
-//     <Box sx={{ flexGrow: 1, overflowY: "auto", minHeight: 0 }}>
-//       <Grid container spacing={1}>
-//         <Grid item xs={6}>
-//           {conditions.slice(0, 4).map((condition) => (
-//             <FormControlLabel
-//               key={condition.id}
-//               control={
-//                 <Checkbox
-//                   checked={values?.[condition.id] || false}
-//                   onChange={onChange}
-//                   name={condition.id}
-//                   disabled={disabled}
-//                 />
-//               }
-//               label={condition.label}
-//               sx={{ display: "block", mb: 1 }}
-//             />
-//           ))}
-//         </Grid>
-//         <Grid item xs={6}>
-//           {conditions.slice(4).map((condition) => (
-//             <FormControlLabel
-//               key={condition.id}
-//               control={
-//                 <Checkbox
-//                   checked={values?.[condition.id] || false}
-//                   onChange={onChange}
-//                   name={condition.id}
-//                   disabled={disabled}
-//                 />
-//               }
-//               label={condition.label}
-//               sx={{ display: "block", mb: 1 }}
-//             />
-//           ))}
-//         </Grid>
-//       </Grid>
-//     </Box>
-//   </Paper>
-// );
-
-// const Dashboard = () => {
-//   const [comparisonMode, setComparisonMode] = useState("OnevsOne");
-//   const [selectedFeatures, setSelectedFeatures] = useState([]);
-//   const [mentalHealth, setMentalHealth] = useState({});
-//   const [mentalHealthGroup1, setMentalHealthGroup1] = useState({});
-//   const [mentalHealthGroup2, setMentalHealthGroup2] = useState({});
-//   const { user } = useContext(UserContext); // UserContext에서 user를 가져옴
-//   const myStudentId = user?.student_id || ""; // user 객체에서 student_id를 가져옴
-//   console.log(myStudentId);
-
-//   // 개인 vs 개인에서 직접 입력할 숫자를 저장할 상태
-//   const [customTarget, setCustomTarget] = useState("");
-//   const [savedTarget, setSavedTarget] = useState("");
-
-//   // Brush된 포인트 저장해 Chart2에 히스토그램 표시
-//   const [brushedPoints, setBrushedPoints] = useState([]);
-
-//   const handleGroup1Change = (event) => {
-//     const { name, checked } = event.target;
-//     setMentalHealthGroup1((prev) => ({ ...prev, [name]: checked }));
-//   };
-//   const handleGroup2Change = (event) => {
-//     const { name, checked } = event.target;
-//     setMentalHealthGroup2((prev) => ({ ...prev, [name]: checked }));
-//   };
-
-//   useEffect(() => {
-//     const myStudent = data[myStudentId];
-//     if (myStudent) {
-//       const initMentalHealth = {};
-//       Object.keys(myStudent.labels).forEach((cond) => {
-//         initMentalHealth[cond] = myStudent.labels[cond] === 1;
-//       });
-//       setMentalHealth(initMentalHealth);
-//     }
-//   }, [myStudentId]);
-
-//   // 그룹 조건에 맞게 학생 데이터를 필터링하는 함수
-//   const filterDataByMentalHealth = (mentalHealthObj) => {
-//     const selectedConditions = Object.keys(mentalHealthObj).filter(
-//       (k) => mentalHealthObj[k]
-//     );
-//     if (selectedConditions.length === 0) return [];
-//     const students = Object.values(data).filter((student) => {
-//       const labels = student.labels;
-//       // 모든 선택된 척도를 만족하는 학생만
-//       return selectedConditions.every((cond) => labels[cond] === 1);
-//     });
-//     return students;
-//   };
-
-//   const handleModeChange = (event) => {
-//     setComparisonMode(event.target.value);
-//     setCustomTarget("");
-//     setSavedTarget("");
-//   };
-
-//   // feature mean/std 선택 로직
-//   const handleFeatureClick = (category, feature, stat) => {
-//     setSelectedFeatures((prev) => {
-//       const existingIndex = prev.findIndex(
-//         (item) =>
-//           item.category === category &&
-//           item.feature === feature &&
-//           item.stat === stat
-//       );
-//       if (existingIndex > -1) {
-//         const newArray = [...prev];
-//         newArray.splice(existingIndex, 1);
-//         return newArray;
-//       }
-//       let newArray = [...prev];
-//       if (newArray.length === 2) {
-//         newArray.shift();
-//       }
-//       newArray.push({ category, feature, stat });
-//       return newArray;
-//     });
-//   };
-
-//   const handleMentalHealthChange = (event) => {
-//     // const { name, checked } = event.target;
-//     // setMentalHealth((prev) => ({
-//     //   ...prev,
-//     //   [name]: checked,
-//     // }));
-//   };
-
-//   const handleCustomTargetChange = (e) => {
-//     setCustomTarget(e.target.value);
-//   };
-
-//   let targetConditions = mentalHealthGroup2; // 혹은 대상자 섹션용 별도 state 필요
-//   const targetStudents = filterDataByMentalHealth(targetConditions);
-//   const maxCount = targetStudents.length > 0 ? targetStudents.length : 1;
-
-//   const handleConfirmTarget = () => {
-//     const val = parseInt(customTarget, 10);
-//     if (val >= 1 && val <= maxCount) {
-//       setSavedTarget(val);
-//       alert(`선택하신 대상: ${val}`);
-//     } else {
-//       alert(`1~${maxCount} 사이의 숫자를 입력하세요.`);
-//     }
-//   };
-
-//   const handleSaveResults = async () => {
-//     const dashboard = document.getElementById("dashboard-content");
-//     try {
-//       const canvas = await html2canvas(dashboard, {
-//         scale: 2,
-//         backgroundColor: null,
-//         logging: false,
-//       });
-//       const image = canvas.toDataURL("image/png");
-//       const link = document.createElement("a");
-//       link.href = image;
-//       link.download = `dashboard-${new Date().toISOString().slice(0, 10)}.png`;
-//       link.click();
-//     } catch (error) {
-//       console.error("Screenshot failed:", error);
-//     }
-//   };
-//   const preparePlotData = (students, selectedFeatures) => {
-//     if (selectedFeatures.length < 2) return [];
-//     const [xFeature, yFeature] = selectedFeatures;
-//     return students
-//       .map((student) => {
-//         const xVal =
-//           student[xFeature.category]?.[xFeature.feature]?.[xFeature.stat];
-//         const yVal =
-//           student[yFeature.category]?.[yFeature.feature]?.[yFeature.stat];
-//         if (xVal != null && yVal != null) {
-//           return { ...student, x: xVal, y: yVal };
-//         }
-//         return null;
-//       })
-//       .filter((d) => d !== null);
-//   };
-
-//   // 모드별로 데이터 준비
-//   let scatterGroupData = []; // ScatterPlot에 넘길 groupData
-//   if (comparisonMode === "GroupvsGroup") {
-//     const group1Filtered = filterDataByMentalHealth(mentalHealthGroup1);
-//     const group2Filtered = filterDataByMentalHealth(mentalHealthGroup2);
-//     const group1Data = preparePlotData(group1Filtered, selectedFeatures);
-//     const group2Data = preparePlotData(group2Filtered, selectedFeatures);
-//     scatterGroupData = [
-//       { data: group1Data, color: "steelblue", groupId: "group1" },
-//       { data: group2Data, color: "orange", groupId: "group2" },
-//     ];
-//   } else if (comparisonMode === "OnevsGroup") {
-//     const groupFiltered = filterDataByMentalHealth(mentalHealthGroup1); // 그룹1 역할 재사용 혹은 mentalHealth를 그룹조건으로 활용
-//     const groupData = preparePlotData(groupFiltered, selectedFeatures);
-//     // "나"의 단일 포인트
-//     // 나의 데이터는 별도 필터링 없이 student_id = myStudentId로 특정
-//     const myStudent = data[myStudentId];
-//     let myData = [];
-//     if (myStudent && selectedFeatures.length === 2) {
-//       const [xFeature, yFeature] = selectedFeatures;
-//       const xVal =
-//         myStudent[xFeature.category]?.[xFeature.feature]?.[xFeature.stat];
-//       const yVal =
-//         myStudent[yFeature.category]?.[yFeature.feature]?.[yFeature.stat];
-//       if (xVal != null && yVal != null) {
-//         myData = [{ ...myStudent, x: xVal, y: yVal }];
-//       }
-//     }
-//     scatterGroupData = [
-//       { data: groupData, color: "steelblue", groupId: "group" },
-//       { data: myData, color: "red", radius: 10, groupId: "my" },
-//     ];
-//   } else if (comparisonMode === "OnevsOne") {
-//     const myStudent = data[myStudentId];
-//     let myData = [];
-//     let targetData = [];
-//     if (myStudent && selectedFeatures.length === 2) {
-//       myData = preparePlotData([myStudent], selectedFeatures);
-//     }
-//     if (savedTarget && selectedFeatures.length === 2) {
-//       if (savedTarget <= targetStudents.length) {
-//         const chosenStudent = targetStudents[savedTarget - 1];
-//         // 이 학생에 대해 preparePlotData 수행
-//         targetData = preparePlotData([chosenStudent], selectedFeatures);
-//       } else {
-//         // 범위를 벗어나면 빈 배열 유지 or 에러 처리
-//         targetData = [];
-//       }
-//     }
-
-//     scatterGroupData = [
-//       { data: myData, color: "red", radius: 10 },
-//       { data: targetData, color: "steelblue" },
-//     ];
-//     console.log("scatterGroupData");
-//     console.log(scatterGroupData);
-//   }
-
-//   // scatterplot에서 brush 이벤트가 발생하면 brushedPoints 업데이트
-//   const handleBrush = (points) => {
-//     setBrushedPoints(points);
-//   };
-
-//   // 상단 레이아웃 동적 계산
-//   let myBoxXs = 3;
-//   let groupBoxXs = 3;
-//   let showTargetSelect = true;
-//   let targetSelectXs = 4;
-//   let myBoxTitle = "나";
-//   let groupBoxTitle = "그룹";
-//   const myPointX =
-//     comparisonMode === "OnevsGroup" && scatterGroupData[1].data.length > 0
-//       ? scatterGroupData[1].data[0].x
-//       : null;
-//   if (comparisonMode === "OnevsGroup") {
-//     showTargetSelect = false;
-//     myBoxXs = 5;
-//     groupBoxXs = 5;
-//   } else if (comparisonMode === "GroupvsGroup") {
-//     showTargetSelect = false;
-//     myBoxXs = 5;
-//     groupBoxXs = 5;
-//     myBoxTitle = "그룹1";
-//     groupBoxTitle = "그룹2";
-//   }
-
-//   return (
-//     <Box
-//       sx={{
-//         minHeight: "100vh",
-//         background: "linear-gradient(135deg, #4F46E530, #10B98130)",
-//         width: "100%",
-//         pb: 4,
-//       }}
-//     >
-//       <Header />
-//       <Container maxWidth="false" sx={{ width: "100%", maxWidth: "1800px" }}>
-//         <Box sx={{ pt: 10 }}>
-//           <Paper
-//             id="dashboard-content"
-//             elevation={3}
-//             sx={{
-//               p: 3,
-//               display: "flex",
-//               flexDirection: "column",
-//               height: "80vh",
-//               overflow: "hidden",
-//               margin: "0 auto",
-//             }}
-//           >
-//             {/* 전체 2개 row: 위 35%, 아래 65% */}
-//             <Grid container spacing={2} sx={{ flex: 1, height: "100%" }}>
-//               {/* 첫 번째 행(35%) */}
-//               <Grid item xs={12} sx={{ height: "35%" }}>
-//                 <Grid container spacing={2} sx={{ height: "100%" }}>
-//                   {/* Comparison Mode (xs=2) */}
-//                   <Grid item xs={2} sx={{ height: "100%" }}>
-//                     <Paper
-//                       elevation={1}
-//                       sx={{
-//                         p: 2,
-//                         border: "1px solid #ddd",
-//                         borderRadius: 2,
-//                         height: "100%",
-//                         overflow: "hidden",
-//                         display: "flex",
-//                         flexDirection: "column",
-//                       }}
-//                     >
-//                       {/* 제목 박스 */}
-//                       <Box
-//                         sx={{
-//                           backgroundColor: "#f0f0f0",
-//                           border: "2px solid #ccc",
-//                           borderRadius: 1,
-//                           textAlign: "center",
-//                           mb: 1,
-//                           py: 1,
-//                         }}
-//                       >
-//                         <Typography
-//                           variant="h6"
-//                           sx={{ m: 0, fontWeight: "bold" }}
-//                         >
-//                           Comparison Mode
-//                         </Typography>
-//                       </Box>
-//                       <FormControl
-//                         component="fieldset"
-//                         sx={{ flex: 1, overflowY: "auto" }}
-//                       >
-//                         <RadioGroup
-//                           value={comparisonMode}
-//                           onChange={handleModeChange}
-//                         >
-//                           <FormControlLabel
-//                             value="OnevsOne"
-//                             control={<Radio />}
-//                             label="개인 vs 개인"
-//                           />
-//                           <FormControlLabel
-//                             value="OnevsGroup"
-//                             control={<Radio />}
-//                             label="개인 vs 그룹"
-//                           />
-//                           <FormControlLabel
-//                             value="GroupvsGroup"
-//                             control={<Radio />}
-//                             label="그룹 vs 그룹"
-//                           />
-//                         </RadioGroup>
-//                       </FormControl>
-//                     </Paper>
-//                   </Grid>
-
-//                   {/* 모드별 UI 분기 */}
-//                   {comparisonMode === "OnevsOne" && (
-//                     <>
-//                       {/* 나 */}
-//                       <Grid item xs={3} sx={{ height: "100%" }}>
-//                         <MentalHealthSection
-//                           title="나"
-//                           conditions={MENTAL_HEALTH_CONDITIONS}
-//                           onChange={() => {}} // 바꿀 수 없으니 빈 핸들러
-//                           values={mentalHealth}
-//                           disabled={true} // 이 props를 추가
-//                         />
-//                       </Grid>
-
-//                       {/* 대상 선택 박스 */}
-//                       <Grid item xs={4} sx={{ height: "100%" }}>
-//                         <Paper
-//                           elevation={1}
-//                           sx={{
-//                             p: 2,
-//                             border: "1px solid #ddd",
-//                             borderRadius: 2,
-//                             height: "100%",
-//                             overflow: "hidden",
-//                             display: "flex",
-//                             flexDirection: "column",
-//                           }}
-//                         >
-//                           <Box
-//                             sx={{
-//                               backgroundColor: "#f0f0f0",
-//                               border: "2px solid #ccc",
-//                               borderRadius: 1,
-//                               textAlign: "center",
-//                               mb: 1,
-//                               py: 1,
-//                             }}
-//                           >
-//                             <Typography
-//                               variant="h6"
-//                               sx={{ m: 0, fontWeight: "bold" }}
-//                             >
-//                               대상 선택
-//                             </Typography>
-//                           </Box>
-//                           <Box sx={{ overflowY: "auto", flex: 1 }}>
-//                             <TextField
-//                               type="number"
-//                               value={customTarget}
-//                               onChange={handleCustomTargetChange}
-//                               label={`1~${maxCount} 사이의 숫자 입력`} // maxCount 반영
-//                               inputProps={{ min: 1, max: maxCount }}
-//                               fullWidth
-//                               sx={{ mb: 2 }}
-//                             />
-//                             <Box
-//                               sx={{
-//                                 display: "flex",
-//                                 justifyContent: "center",
-//                                 mt: 2,
-//                               }}
-//                             >
-//                               <Button
-//                                 variant="contained"
-//                                 onClick={handleConfirmTarget}
-//                                 size="small"
-//                               >
-//                                 확인
-//                               </Button>
-//                             </Box>
-//                             {savedTarget && (
-//                               <Typography variant="body2" sx={{ mt: 2 }}>
-//                                 선택된 대상: {savedTarget}
-//                               </Typography>
-//                             )}
-//                           </Box>
-//                         </Paper>
-//                       </Grid>
-
-//                       {/* 비교 대상 그룹(혹은 개인) - 여기서는 빈 체크박스 섹션 or 필요없으면 제거 */}
-//                       <Grid item xs={3} sx={{ height: "100%" }}>
-//                         <MentalHealthSection
-//                           title="대상자"
-//                           conditions={MENTAL_HEALTH_CONDITIONS}
-//                           onChange={handleGroup2Change} // 대상자 섹션 상태 관리
-//                           values={mentalHealthGroup2}
-//                         />
-//                       </Grid>
-//                     </>
-//                   )}
-
-//                   {comparisonMode === "OnevsGroup" && (
-//                     <>
-//                       {/* 나: disabled 처리 */}
-//                       <Grid item xs={5} sx={{ height: "100%" }}>
-//                         <MentalHealthSection
-//                           title="나"
-//                           conditions={MENTAL_HEALTH_CONDITIONS}
-//                           onChange={() => {}} // 변경 불가
-//                           values={mentalHealth}
-//                           disabled={true}
-//                         />
-//                       </Grid>
-
-//                       {/* 그룹 */}
-//                       <Grid item xs={5} sx={{ height: "100%" }}>
-//                         <MentalHealthSection
-//                           title="그룹"
-//                           conditions={MENTAL_HEALTH_CONDITIONS}
-//                           onChange={handleGroup1Change}
-//                           values={mentalHealthGroup1}
-//                         />
-//                       </Grid>
-//                     </>
-//                   )}
-
-//                   {comparisonMode === "GroupvsGroup" && (
-//                     <>
-//                       {/* 그룹1 */}
-//                       <Grid item xs={5} sx={{ height: "100%" }}>
-//                         <MentalHealthSection
-//                           title="그룹1"
-//                           conditions={MENTAL_HEALTH_CONDITIONS}
-//                           onChange={handleGroup1Change}
-//                           values={mentalHealthGroup1}
-//                         />
-//                       </Grid>
-
-//                       {/* 그룹2 */}
-//                       <Grid item xs={5} sx={{ height: "100%" }}>
-//                         <MentalHealthSection
-//                           title="그룹2"
-//                           conditions={MENTAL_HEALTH_CONDITIONS}
-//                           onChange={handleGroup2Change}
-//                           values={mentalHealthGroup2}
-//                         />
-//                       </Grid>
-//                     </>
-//                   )}
-//                 </Grid>
-//               </Grid>
-
-//               {/* 두 번째 행(65%) - Features / Chart1(Scatter) / Chart2(Histogram) */}
-//               <Grid item xs={12} sx={{ height: "65%" }}>
-//                 <Grid container spacing={2} sx={{ height: "100%" }}>
-//                   {/* Features xs=2 */}
-//                   <Grid item xs={2} sx={{ height: "100%" }}>
-//                     <Paper
-//                       elevation={1}
-//                       sx={{
-//                         p: 2,
-//                         border: "1px solid #ddd",
-//                         borderRadius: 2,
-//                         height: "100%",
-//                         overflow: "hidden",
-//                         display: "flex",
-//                         flexDirection: "column",
-//                       }}
-//                     >
-//                       <Box
-//                         sx={{
-//                           backgroundColor: "#f0f0f0",
-//                           border: "2px solid #ccc",
-//                           borderRadius: 1,
-//                           textAlign: "center",
-//                           mb: 1,
-//                           py: 1,
-//                         }}
-//                       >
-//                         <Typography
-//                           variant="h6"
-//                           sx={{ m: 0, fontWeight: "bold" }}
-//                         >
-//                           Features
-//                         </Typography>
-//                       </Box>
-//                       <Box sx={{ overflowY: "auto", flex: 1 }}>
-//                         {FEATURE_TREE.map((group) => (
-//                           <Accordion key={group.category}>
-//                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-//                               {group.category}
-//                             </AccordionSummary>
-//                             <AccordionDetails>
-//                               {group.features.map((feature) => (
-//                                 <Accordion key={feature}>
-//                                   <AccordionSummary
-//                                     expandIcon={<ExpandMoreIcon />}
-//                                   >
-//                                     {feature}
-//                                   </AccordionSummary>
-//                                   <AccordionDetails>
-//                                     <Button
-//                                       variant={
-//                                         selectedFeatures.some(
-//                                           (item) =>
-//                                             item.category === group.category &&
-//                                             item.feature === feature &&
-//                                             item.stat === "mean"
-//                                         )
-//                                           ? "contained"
-//                                           : "outlined"
-//                                       }
-//                                       onClick={() =>
-//                                         handleFeatureClick(
-//                                           group.category,
-//                                           feature,
-//                                           "mean"
-//                                         )
-//                                       }
-//                                       sx={{
-//                                         mb: 1,
-//                                         width: "100%",
-//                                         textAlign: "left",
-//                                       }}
-//                                     >
-//                                       mean
-//                                     </Button>
-//                                     <Button
-//                                       variant={
-//                                         selectedFeatures.some(
-//                                           (item) =>
-//                                             item.category === group.category &&
-//                                             item.feature === feature &&
-//                                             item.stat === "std"
-//                                         )
-//                                           ? "contained"
-//                                           : "outlined"
-//                                       }
-//                                       onClick={() =>
-//                                         handleFeatureClick(
-//                                           group.category,
-//                                           feature,
-//                                           "std"
-//                                         )
-//                                       }
-//                                       sx={{
-//                                         mb: 1,
-//                                         width: "100%",
-//                                         textAlign: "left",
-//                                       }}
-//                                     >
-//                                       std
-//                                     </Button>
-//                                   </AccordionDetails>
-//                                 </Accordion>
-//                               ))}
-//                               {group.features.length === 0 && (
-//                                 <Typography
-//                                   variant="body2"
-//                                   color="textSecondary"
-//                                 >
-//                                   No features available.
-//                                 </Typography>
-//                               )}
-//                             </AccordionDetails>
-//                           </Accordion>
-//                         ))}
-//                       </Box>
-//                     </Paper>
-//                   </Grid>
-
-//                   {/* Chart1 (ScatterPlot) xs=5 */}
-//                   <Grid item xs={5} sx={{ height: "100%" }}>
-//                     <Paper
-//                       elevation={1}
-//                       sx={{
-//                         p: 2,
-//                         border: "1px solid #ddd",
-//                         borderRadius: 2,
-//                         height: "100%",
-//                         overflow: "hidden",
-//                         display: "flex",
-//                         flexDirection: "column",
-//                       }}
-//                     >
-//                       {/* 제목 제거 → 더 넓게 ScatterPlot 차지 */}
-//                       <Box sx={{ flex: 1, position: "relative" }}>
-//                         <ScatterPlot
-//                           selectedFeatures={selectedFeatures}
-//                           onBrush={handleBrush}
-//                           groupData={scatterGroupData}
-//                           comparisonMode={comparisonMode}
-//                         />
-//                       </Box>
-//                     </Paper>
-//                   </Grid>
-
-//                   {/* Chart2 (HistogramPlot) xs=5 */}
-//                   <Grid item xs={5} sx={{ height: "100%" }}>
-//                     <Paper
-//                       elevation={1}
-//                       sx={{
-//                         p: 2,
-//                         border: "1px solid #ddd",
-//                         borderRadius: 2,
-//                         height: "100%",
-//                         overflow: "hidden",
-//                         display: "flex",
-//                         flexDirection: "column",
-//                       }}
-//                     >
-//                       {/* 제목 제거 → HistogramPlot */}
-//                       <Box sx={{ flex: 1, position: "relative" }}>
-//                         <HistogramPlot
-//                           brushedData={brushedPoints}
-//                           myValue={myPointX}
-//                           comparisonMode={comparisonMode}
-//                         />
-//                       </Box>
-//                     </Paper>
-//                   </Grid>
-//                 </Grid>
-//               </Grid>
-//             </Grid>
-//           </Paper>
-
-//           {/* 결과 저장 버튼 */}
-//           <Box sx={{ mt: 4, textAlign: "right" }}>
-//             <Button
-//               variant="contained"
-//               onClick={handleSaveResults}
-//               sx={{
-//                 bgcolor: "#007BFF",
-//                 color: "white",
-//                 "&:hover": { bgcolor: "#0056b3" },
-//               }}
-//             >
-//               결과 저장
-//             </Button>
-//           </Box>
-//         </Box>
-//       </Container>
-//     </Box>
-//   );
-// };
-
-// export default Dashboard;
-
+// Dashboard.js
 import React, { useState, useEffect, useContext } from "react";
 import {
   Box,
@@ -857,16 +19,14 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  List,
-  ListItem,
-  ListItemText,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Header from "./Header";
 import html2canvas from "html2canvas";
-import ScatterPlot from "./Scatterplot.js";
-import HistogramPlot from "./HistogramPlot.js";
-import data from "../data/phenotyping_data_with_label_v1.json";
+import ScatterPlot from "./Scatterplot";
+import HistogramPlot from "./HistogramPlot";
+import FeatureSelectionMatrixModal from "./FeatureSelectionMatrixModal"; // 추가
+import data from "../data/phenotyping_data_with_label_v2.json";
 import { UserContext } from "../UserContext";
 
 // 박스에 제목 느낌을 주는 컴포넌트
@@ -900,7 +60,7 @@ const MENTAL_HEALTH_CONDITIONS = [
 ];
 
 // 계층 구조 Feature 목록
-const FEATURE_TREE = [
+export const FEATURE_TREE = [
   {
     category: "nkeys_btw",
     features: ["backspaces", "spaces"],
@@ -964,7 +124,7 @@ const FEATURE_TREE = [
   },
 ];
 
-// MentalHealthSection 컴포넌트
+// MentalHealthSection
 const MentalHealthSection = ({
   title,
   conditions,
@@ -983,12 +143,7 @@ const MentalHealthSection = ({
       overflow: "hidden",
       display: "flex",
       flexDirection: "column",
-      fontSize: {
-        xs: "0.75rem",
-        sm: "0.8rem",
-        md: "0.9rem",
-        lg: "1rem",
-      },
+      fontSize: { xs: "0.75rem", sm: "0.8rem", md: "0.9rem", lg: "1rem" },
     }}
   >
     <TitleBox>{title}</TitleBox>
@@ -1042,18 +197,18 @@ const Dashboard = () => {
   const { user } = useContext(UserContext);
   const myStudentId = user?.student_id || "";
 
-  // Brush된 포인트들
+  // 브러시된 포인트
   const [brushedPoints, setBrushedPoints] = useState([]);
 
-  // 개인 vs 개인에서 직접 입력할 숫자를 저장할 상태
+  // 개인 vs 개인
   const [customTarget, setCustomTarget] = useState("");
   const [savedTarget, setSavedTarget] = useState("");
 
-  // 모달 열림/닫힘 상태
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  // Feature Selection 모달 오픈 state
+  const [featureSelectionOpen, setFeatureSelectionOpen] = useState(false);
 
   useEffect(() => {
-    // 내 mentalHealth (disabled로만 표시)
+    // 내 mentalHealth (디폴트)
     const myStudent = data[myStudentId];
     if (myStudent) {
       const initMentalHealth = {};
@@ -1064,27 +219,28 @@ const Dashboard = () => {
     }
   }, [myStudentId]);
 
-  const handleGroup1Change = (event) => {
-    const { name, checked } = event.target;
+  const handleGroup1Change = (e) => {
+    const { name, checked } = e.target;
     setMentalHealthGroup1((prev) => ({ ...prev, [name]: checked }));
   };
-  const handleGroup2Change = (event) => {
-    const { name, checked } = event.target;
+  const handleGroup2Change = (e) => {
+    const { name, checked } = e.target;
     setMentalHealthGroup2((prev) => ({ ...prev, [name]: checked }));
   };
 
-  // 그룹 조건에 맞게 학생 데이터를 필터링
+  // 병에 맞게 학생 필터
   const filterDataByMentalHealth = (mentalHealthObj) => {
+    // 체크된 병이 없으면 전체 데이터셋
     const selectedConditions = Object.keys(mentalHealthObj).filter(
       (k) => mentalHealthObj[k]
     );
-    if (selectedConditions.length === 0) return [];
-    const students = Object.values(data).filter((student) => {
-      const labels = student.labels;
-      // 모든 선택된 척도를 만족하는 학생만
-      return selectedConditions.every((cond) => labels[cond] === 1);
+    if (selectedConditions.length === 0) {
+      return Object.values(data); // 전체
+    }
+    // 일부 병만
+    return Object.values(data).filter((student) => {
+      return selectedConditions.every((cond) => student.labels[cond] === 1);
     });
-    return students;
   };
 
   const handleModeChange = (event) => {
@@ -1093,26 +249,24 @@ const Dashboard = () => {
     setSavedTarget("");
   };
 
-  // feature mean/std 선택 로직
+  // feature mean/std
   const handleFeatureClick = (category, feature, stat) => {
     setSelectedFeatures((prev) => {
-      const existingIndex = prev.findIndex(
-        (item) =>
-          item.category === category &&
-          item.feature === feature &&
-          item.stat === stat
+      const idx = prev.findIndex(
+        (f) =>
+          f.category === category && f.feature === feature && f.stat === stat
       );
-      if (existingIndex > -1) {
-        const newArray = [...prev];
-        newArray.splice(existingIndex, 1);
-        return newArray;
+      if (idx > -1) {
+        // 이미 선택되어 있으면 제거
+        const newArr = [...prev];
+        newArr.splice(idx, 1);
+        return newArr;
       }
-      let newArray = [...prev];
-      if (newArray.length === 2) {
-        newArray.shift();
-      }
-      newArray.push({ category, feature, stat });
-      return newArray;
+      // 새로 추가
+      let newArr = [...prev];
+      if (newArr.length === 2) newArr.shift();
+      newArr.push({ category, feature, stat });
+      return newArr;
     });
   };
 
@@ -1120,11 +274,10 @@ const Dashboard = () => {
     setCustomTarget(e.target.value);
   };
 
-  const targetStudents = filterDataByMentalHealth(mentalHealthGroup2);
-  const maxCount = targetStudents.length > 0 ? targetStudents.length : 1;
-
   const handleConfirmTarget = () => {
     const val = parseInt(customTarget, 10);
+    const group2Filtered = filterDataByMentalHealth(mentalHealthGroup2);
+    const maxCount = group2Filtered.length > 0 ? group2Filtered.length : 1;
     if (val >= 1 && val <= maxCount) {
       setSavedTarget(val);
       alert(`선택하신 대상: ${val}`);
@@ -1146,12 +299,12 @@ const Dashboard = () => {
       link.href = image;
       link.download = `dashboard-${new Date().toISOString().slice(0, 10)}.png`;
       link.click();
-    } catch (error) {
-      console.error("Screenshot failed:", error);
+    } catch (err) {
+      console.error("Screenshot failed:", err);
     }
   };
 
-  // 사이즈(최댓값) 및 툴팁 정보를 계산
+  // sizeVal 계산
   const computeSizeTooltip = (student, mentalHealthObj) => {
     const selectedConditions = Object.keys(mentalHealthObj).filter(
       (k) => mentalHealthObj[k]
@@ -1161,109 +314,77 @@ const Dashboard = () => {
     }
     let scaleValues = [];
     let tooltipData = [];
-
     selectedConditions.forEach((cond) => {
       const scaleKey = cond + "_scale";
-      const scaleVal = student.labels?.[scaleKey] ?? 0;
+      const scaleVal = student.labels?.[scaleKey] || 0;
       scaleValues.push(scaleVal);
       tooltipData.push({ condition: cond, scaleValue: scaleVal });
     });
     const maxScale = Math.max(...scaleValues);
-
-    return {
-      sizeVal: maxScale,
-      tooltipData,
-    };
+    return { sizeVal: maxScale, tooltipData };
   };
 
-  // ScatterPlot에 넘길 최종 데이터
   const preparePlotData = (students, selectedFeatures, mentalHealthObj) => {
     if (selectedFeatures.length < 2) return [];
-    const [xFeature, yFeature] = selectedFeatures;
+    const [xF, yF] = selectedFeatures;
     return students
-      .map((student) => {
-        const xVal =
-          student[xFeature.category]?.[xFeature.feature]?.[xFeature.stat];
-        const yVal =
-          student[yFeature.category]?.[yFeature.feature]?.[yFeature.stat];
+      .map((stu) => {
+        const xVal = stu[xF.category]?.[xF.feature]?.[xF.stat];
+        const yVal = stu[yF.category]?.[yF.feature]?.[yF.stat];
         if (xVal == null || yVal == null) return null;
-
         const { sizeVal, tooltipData } = computeSizeTooltip(
-          student,
+          stu,
           mentalHealthObj
         );
-        return {
-          ...student,
-          x: xVal,
-          y: yVal,
-          sizeVal,
-          tooltipData,
-        };
+        return { ...stu, x: xVal, y: yVal, sizeVal, tooltipData };
       })
       .filter((d) => d !== null);
   };
 
+  // 비교모드별 groupData
   let scatterGroupData = [];
+  const group1Filtered = filterDataByMentalHealth(mentalHealthGroup1);
+  const group2Filtered = filterDataByMentalHealth(mentalHealthGroup2);
+
+  // group1Data, group2Data
+  const group1Data = preparePlotData(
+    group1Filtered,
+    selectedFeatures,
+    mentalHealthGroup1
+  );
+  const group2Data = preparePlotData(
+    group2Filtered,
+    selectedFeatures,
+    mentalHealthGroup2
+  );
+
   if (comparisonMode === "GroupvsGroup") {
-    const group1Filtered = filterDataByMentalHealth(mentalHealthGroup1);
-    const group2Filtered = filterDataByMentalHealth(mentalHealthGroup2);
-    const group1Data = preparePlotData(
-      group1Filtered,
-      selectedFeatures,
-      mentalHealthGroup1
-    );
-    const group2Data = preparePlotData(
-      group2Filtered,
-      selectedFeatures,
-      mentalHealthGroup2
-    );
     scatterGroupData = [
       { data: group1Data, color: "steelblue", groupId: "group1" },
       { data: group2Data, color: "orange", groupId: "group2" },
     ];
   } else if (comparisonMode === "OnevsGroup") {
-    const selectedConditions = Object.keys(mentalHealthGroup1).filter(
-      (k) => mentalHealthGroup1[k]
-    );
-    let groupFiltered = [];
-    if (selectedConditions.length === 0) {
-      // 아무것도 선택 안 했으면 전체 학생 데이터 사용
-      groupFiltered = Object.values(data);
-    } else {
-      groupFiltered = filterDataByMentalHealth(mentalHealthGroup1);
-    }
-    const groupData = preparePlotData(
-      groupFiltered,
-      selectedFeatures,
-      mentalHealthGroup1
-    );
-    // 나
     const myStudent = data[myStudentId];
     let myData = [];
     if (myStudent && selectedFeatures.length === 2) {
-      const singlePointArray = preparePlotData(
-        [myStudent],
-        selectedFeatures,
-        mentalHealth
-      );
-      myData = singlePointArray;
+      myData = preparePlotData([myStudent], selectedFeatures, mentalHealth);
     }
     scatterGroupData = [
-      { data: groupData, color: "steelblue", groupId: "group" },
+      { data: group1Data, color: "steelblue", groupId: "group" },
       { data: myData, color: "red", radius: 10, groupId: "my" },
     ];
   } else if (comparisonMode === "OnevsOne") {
     const myStudent = data[myStudentId];
-    let myData = [];
-    let targetData = [];
+    let myData = [],
+      targetData = [];
     if (myStudent && selectedFeatures.length === 2) {
       myData = preparePlotData([myStudent], selectedFeatures, mentalHealth);
     }
     if (savedTarget && selectedFeatures.length === 2) {
-      if (savedTarget <= targetStudents.length) {
-        const chosenStudent = targetStudents[savedTarget - 1];
+      if (savedTarget <= group2Filtered.length) {
+        const chosen = group2Filtered[savedTarget - 1];
         targetData = preparePlotData(
-          [chosenStudent],
+          [chosen],
           selectedFeatures,
           mentalHealthGroup2
         );
@@ -1274,46 +395,64 @@ const Dashboard = () => {
       { data: targetData, color: "steelblue", groupId: "target" },
     ];
   }
+  // === 여기에, 매트릭스 모달을 위한 별도 rawData 준비 ===
+  const featureSelectionModalData = [];
+  if (comparisonMode === "GroupvsGroup") {
+    featureSelectionModalData.push(
+      { data: group1Filtered, color: "steelblue", groupId: "group1" },
+      { data: group2Filtered, color: "orange", groupId: "group2" }
+    );
+  } else if (comparisonMode === "OnevsGroup") {
+    const myStudent = data[myStudentId];
+    if (myStudent) {
+      featureSelectionModalData.push({
+        data: [myStudent],
+        color: "red",
+        groupId: "my",
+      });
+    }
+    featureSelectionModalData.push({
+      data: group1Filtered,
+      color: "steelblue",
+      groupId: "group",
+    });
+  } else if (comparisonMode === "OnevsOne") {
+    const myStudent = data[myStudentId];
+    if (myStudent) {
+      featureSelectionModalData.push({
+        data: [myStudent],
+        color: "red",
+        groupId: "my",
+      });
+    }
+    // 선택된 n번째 타겟
+    if (savedTarget && savedTarget <= group2Filtered.length) {
+      featureSelectionModalData.push({
+        data: [group2Filtered[savedTarget - 1]],
+        color: "steelblue",
+        groupId: "target",
+      });
+    }
+  }
 
-  // 브러시에서 넘어오는 선택된 포인트
   const handleBrush = (points) => {
     setBrushedPoints(points);
   };
 
-  // HistogramPlot에서 모달 버튼 누르면 열리는 함수
-  const handleOpenDetailModal = () => {
-    setDetailModalOpen(true);
-  };
-  const handleCloseDetailModal = () => {
-    setDetailModalOpen(false);
-  };
-
-  // 모달에서 보여줄 브러시 요약
-  let brushedSummary = null;
-  if (brushedPoints.length > 0) {
-    const avgX =
-      brushedPoints.reduce((sum, d) => sum + d.x, 0) / brushedPoints.length;
-    const avgY =
-      brushedPoints.reduce((sum, d) => sum + d.y, 0) / brushedPoints.length;
-    brushedSummary = {
-      count: brushedPoints.length,
-      avgX,
-      avgY,
-    };
+  // "나" 히스토그램 라인
+  let myPointX = null;
+  if (
+    comparisonMode === "OnevsGroup" &&
+    scatterGroupData[1]?.data?.length > 0
+  ) {
+    myPointX = scatterGroupData[1].data[0].x;
   }
-
-  // "나"의 히스토그램 라인 표시용 X좌표
-  const myPointX =
-    comparisonMode === "OnevsGroup" && scatterGroupData[1].data.length > 0
-      ? scatterGroupData[1].data[0].x
-      : null;
 
   return (
     <Box
       sx={{
         minHeight: "100vh",
         background: "linear-gradient(135deg, #4F46E530, #10B98130)",
-        width: "100%",
         pb: 4,
       }}
     >
@@ -1332,12 +471,11 @@ const Dashboard = () => {
               margin: "0 auto",
             }}
           >
-            {/* 전체 2개 row: 위 35%, 아래 65% */}
             <Grid container spacing={2} sx={{ flex: 1, height: "100%" }}>
               {/* 첫 번째 행(35%) */}
               <Grid item xs={12} sx={{ height: "35%" }}>
                 <Grid container spacing={2} sx={{ height: "100%" }}>
-                  {/* Comparison Mode (xs=2) */}
+                  {/* 모드 */}
                   <Grid item xs={2} sx={{ height: "100%" }}>
                     <Paper
                       elevation={1}
@@ -1396,21 +534,18 @@ const Dashboard = () => {
                     </Paper>
                   </Grid>
 
-                  {/* 모드별 UI 분기 */}
+                  {/* 모드별 UI */}
                   {comparisonMode === "OnevsOne" && (
                     <>
-                      {/* 나 */}
                       <Grid item xs={3} sx={{ height: "100%" }}>
                         <MentalHealthSection
                           title="나"
                           conditions={MENTAL_HEALTH_CONDITIONS}
                           onChange={() => {}}
                           values={mentalHealth}
-                          disabled={true}
+                          disabled
                         />
                       </Grid>
-
-                      {/* 대상 선택 박스 */}
                       <Grid item xs={4} sx={{ height: "100%" }}>
                         <Paper
                           elevation={1}
@@ -1446,8 +581,9 @@ const Dashboard = () => {
                               type="number"
                               value={customTarget}
                               onChange={handleCustomTargetChange}
-                              label={`1~${maxCount} 사이의 숫자 입력`}
-                              inputProps={{ min: 1, max: maxCount }}
+                              label={`1~${
+                                group2Filtered.length || 1
+                              } 사이의 숫자`}
                               fullWidth
                               sx={{ mb: 2 }}
                             />
@@ -1474,8 +610,6 @@ const Dashboard = () => {
                           </Box>
                         </Paper>
                       </Grid>
-
-                      {/* 비교 대상 그룹(혹은 개인) */}
                       <Grid item xs={3} sx={{ height: "100%" }}>
                         <MentalHealthSection
                           title="대상자"
@@ -1495,10 +629,9 @@ const Dashboard = () => {
                           conditions={MENTAL_HEALTH_CONDITIONS}
                           onChange={() => {}}
                           values={mentalHealth}
-                          disabled={true}
+                          disabled
                         />
                       </Grid>
-
                       <Grid item xs={5} sx={{ height: "100%" }}>
                         <MentalHealthSection
                           title="그룹"
@@ -1533,10 +666,10 @@ const Dashboard = () => {
                 </Grid>
               </Grid>
 
-              {/* 두 번째 행(65%) - Features / Chart1(Scatter) / Chart2(Histogram) */}
+              {/* 두 번째 행(65%) - Features / Chart1 / Chart2 */}
               <Grid item xs={12} sx={{ height: "65%" }}>
                 <Grid container spacing={2} sx={{ height: "100%" }}>
-                  {/* Features xs=2 */}
+                  {/* Features (xs=2) */}
                   <Grid item xs={2} sx={{ height: "100%" }}>
                     <Paper
                       elevation={1}
@@ -1585,10 +718,10 @@ const Dashboard = () => {
                                     <Button
                                       variant={
                                         selectedFeatures.some(
-                                          (item) =>
-                                            item.category === group.category &&
-                                            item.feature === feature &&
-                                            item.stat === "mean"
+                                          (f) =>
+                                            f.category === group.category &&
+                                            f.feature === feature &&
+                                            f.stat === "mean"
                                         )
                                           ? "contained"
                                           : "outlined"
@@ -1611,10 +744,10 @@ const Dashboard = () => {
                                     <Button
                                       variant={
                                         selectedFeatures.some(
-                                          (item) =>
-                                            item.category === group.category &&
-                                            item.feature === feature &&
-                                            item.stat === "std"
+                                          (f) =>
+                                            f.category === group.category &&
+                                            f.feature === feature &&
+                                            f.stat === "std"
                                         )
                                           ? "contained"
                                           : "outlined"
@@ -1649,6 +782,16 @@ const Dashboard = () => {
                           </Accordion>
                         ))}
                       </Box>
+
+                      {/* FeatureSelection 모달 버튼 */}
+                      <Box sx={{ mt: 2, textAlign: "center" }}>
+                        <Button
+                          variant="outlined"
+                          onClick={() => setFeatureSelectionOpen(true)}
+                        >
+                          Feature Selection
+                        </Button>
+                      </Box>
                     </Paper>
                   </Grid>
 
@@ -1678,11 +821,7 @@ const Dashboard = () => {
                   </Grid>
 
                   {/* Chart2 (HistogramPlot) xs=5 */}
-                  <Grid
-                    item
-                    xs={5}
-                    sx={{ height: "100%", position: "relative" }}
-                  >
+                  <Grid item xs={5} sx={{ height: "100%" }}>
                     <Paper
                       elevation={1}
                       sx={{
@@ -1693,27 +832,8 @@ const Dashboard = () => {
                         overflow: "hidden",
                         display: "flex",
                         flexDirection: "column",
-                        position: "relative",
                       }}
                     >
-                      {/* 우측상단 Details 버튼 */}
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: 8,
-                          right: 8,
-                          zIndex: 10,
-                        }}
-                      >
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={handleOpenDetailModal}
-                        >
-                          Details
-                        </Button>
-                      </Box>
-
                       <Box sx={{ flex: 1, position: "relative" }}>
                         <HistogramPlot
                           brushedData={brushedPoints}
@@ -1730,56 +850,19 @@ const Dashboard = () => {
 
           {/* 결과 저장 버튼 */}
           <Box sx={{ mt: 4, textAlign: "right" }}>
-            <Button
-              variant="contained"
-              onClick={handleSaveResults}
-              sx={{
-                bgcolor: "#007BFF",
-                color: "white",
-                "&:hover": { bgcolor: "#0056b3" },
-              }}
-            >
+            <Button variant="contained" onClick={handleSaveResults}>
               결과 저장
             </Button>
           </Box>
         </Box>
       </Container>
 
-      {/* 브러시된 점들 상세 정보 모달 */}
-      <Dialog
-        open={detailModalOpen}
-        onClose={handleCloseDetailModal}
-        fullWidth
-        maxWidth="xs"
-      >
-        <DialogTitle>Brushed Points Info</DialogTitle>
-        <DialogContent dividers>
-          {brushedPoints.length === 0 ? (
-            <Typography variant="body2">No points selected</Typography>
-          ) : (
-            <>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                Count: {brushedSummary?.count}
-                <br />
-                Avg X: {brushedSummary?.avgX.toFixed(2)}
-                <br />
-                Avg Y: {brushedSummary?.avgY.toFixed(2)}
-              </Typography>
-              <List dense>
-                {brushedPoints.map((d, idx) => (
-                  <ListItem key={idx} sx={{ py: 0.2 }}>
-                    <ListItemText
-                      primary={`ID: ${
-                        d.student_id || "unknown"
-                      } / sizeVal: ${d.sizeVal?.toFixed(1)}`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Feature Selection 모달: 열 때마다 초기화 */}
+      <FeatureSelectionMatrixModal
+        open={featureSelectionOpen}
+        onClose={() => setFeatureSelectionOpen(false)}
+        groupData={featureSelectionModalData} // 필터링된 데이터
+      />
     </Box>
   );
 };
