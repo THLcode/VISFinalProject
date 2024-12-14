@@ -274,6 +274,7 @@
 // // };
 
 // // export default ScatterPlot;
+
 import React, { useRef, useEffect } from "react";
 import * as d3 from "d3";
 
@@ -332,10 +333,11 @@ const ScatterPlot = ({
       .domain([sizeExtent[0] || 0, sizeExtent[1] || 0])
       .range([3, 15]);
 
-    // 그룹별 circle
+    // 그룹별 circle과 등고선
     groupData.forEach((group, i) => {
       const defaultRadius = group.radius || 5;
 
+      // 각 그룹 데이터 그리기
       const circles = svg
         .selectAll(`.circle-group-${i}`)
         .data(group.data)
@@ -352,13 +354,33 @@ const ScatterPlot = ({
 
       // 마우스오버 툴팁(간단히)
       circles.on("mouseover", (event, d) => {
-        // 선택적으로 tooltip div 만들어 사용 가능, 간단히 콘솔 로그로 대체
         console.log("MouseOver:", d.student_id, "sizeVal:", d.sizeVal);
       });
+
+      // 등고선 계산
+      const contourData = group.data.map((d) => [xScale(d.x), yScale(d.y)]);
+      const density = d3
+        .contourDensity()
+        .x((d) => d[0])
+        .y((d) => d[1])
+        .size([width, height])
+        .bandwidth(50)(contourData);
+
+      // 등고선 그리기
+      svg
+        .append("g")
+        .selectAll("path")
+        .data(density)
+        .enter()
+        .append("path")
+        .attr("d", d3.geoPath())
+        .attr("fill", "none")
+        .attr("stroke", group.color)
+        .attr("stroke-width", 2)
+        .attr("stroke-opacity", 0.3);
     });
 
-    // ---- (3) 회귀선(Regression Line) 표시 ----
-    // 간단한 1차원 선형회귀 (OLS) 구현
+    // 회귀선(Regression Line) 추가
     const n = combinedData.length;
     if (n > 1) {
       const meanX = d3.mean(combinedData, (d) => d.x);
@@ -373,7 +395,6 @@ const ScatterPlot = ({
       const slope = denominator === 0 ? 0 : numerator / denominator;
       const intercept = meanY - slope * meanX;
 
-      // 회귀선을 xDomain 범위 전체에 걸쳐 그린다
       const [xMin, xMax] = d3.extent(combinedData, (d) => d.x);
       const line = d3
         .line()

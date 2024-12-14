@@ -1222,7 +1222,16 @@ const Dashboard = () => {
       { data: group2Data, color: "orange", groupId: "group2" },
     ];
   } else if (comparisonMode === "OnevsGroup") {
-    const groupFiltered = filterDataByMentalHealth(mentalHealthGroup1);
+    const selectedConditions = Object.keys(mentalHealthGroup1).filter(
+      (k) => mentalHealthGroup1[k]
+    );
+    let groupFiltered = [];
+    if (selectedConditions.length === 0) {
+      // 아무것도 선택 안 했으면 전체 학생 데이터 사용
+      groupFiltered = Object.values(data);
+    } else {
+      groupFiltered = filterDataByMentalHealth(mentalHealthGroup1);
+    }
     const groupData = preparePlotData(
       groupFiltered,
       selectedFeatures,
@@ -1756,7 +1765,7 @@ const Dashboard = () => {
                 <br />
                 Avg Y: {brushedSummary?.avgY.toFixed(2)}
               </Typography>
-              {/* <List dense>
+              <List dense>
                 {brushedPoints.map((d, idx) => (
                   <ListItem key={idx} sx={{ py: 0.2 }}>
                     <ListItemText
@@ -1766,7 +1775,7 @@ const Dashboard = () => {
                     />
                   </ListItem>
                 ))}
-              </List> */}
+              </List>
             </>
           )}
         </DialogContent>
