@@ -3,9 +3,6 @@ import * as d3 from "d3";
 
 const ScatterPlot = ({ groupData = [], selectedFeatures, comparisonMode, onBrush }) => {
   const svgRef = useRef(null);
-  console.log(groupData)
-  console.log(comparisonMode)
-
   useEffect(() => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -45,9 +42,10 @@ const ScatterPlot = ({ groupData = [], selectedFeatures, comparisonMode, onBrush
 
     // 그룹 데이터 그리기
     groupData.forEach((group, i) => {
-      const radius = group.radius || 4; // radius 지정 없으면 기본 4
+      const radius = group.radius || 5;
+      const pointsWithGroupId = group.data.map(d => ({ ...d, groupId: group.groupId }));
       svg.selectAll(`.circle-group-${i}`)
-        .data(group.data)
+      .data(pointsWithGroupId)
         .enter()
         .append("circle")
         .attr("class", `circle-group-${i}`)
@@ -55,8 +53,9 @@ const ScatterPlot = ({ groupData = [], selectedFeatures, comparisonMode, onBrush
         .attr("cy", d => yScale(d.y))
         .attr("r", radius)
         .attr("fill", group.color)
-        .attr("opacity", 0.7);
+        .attr("opacity", 0.5);
     });
+    
 
     // Brush
     if (onBrush) {
@@ -68,13 +67,16 @@ const ScatterPlot = ({ groupData = [], selectedFeatures, comparisonMode, onBrush
             return;
           }
           const [[x0, y0], [x1, y1]] = event.selection;
-          const brushedPoints = groupData.flatMap(g =>
-            g.data.filter(d => {
+          
+          // 브러시 영역 내 포인트 필터링 시 groupData를 다시 한 번 순회
+          const brushedPoints = groupData.flatMap((g) => {
+            const pointsWithGroupId = g.data.map(d => ({ ...d, groupId: g.groupId }));
+            return pointsWithGroupId.filter(d => {
               const cx = xScale(d.x);
               const cy = yScale(d.y);
               return cx >= x0 && cx <= x1 && cy >= y0 && cy <= y1;
-            })
-          );
+            });
+          });
           onBrush(brushedPoints);
         });
 

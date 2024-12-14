@@ -21,7 +21,7 @@ import Header from "./Header";
 import html2canvas from "html2canvas";
 import ScatterPlot from "./Scatterplot.js";
 import HistogramPlot from "./HistogramPlot.js";
-import data from "../data/phenotyping_data_with_label_v2.json";
+import data from "../data/phenotyping_data_with_label_v1.json";
 // 박스에 제목 느낌을 주는 컴포넌트 (필요 없으면 제거해도 됩니다)
 const TitleBox = ({ children }) => (
   <Box
@@ -312,15 +312,13 @@ const Dashboard = () => {
   // 모드별로 데이터 준비
   let scatterGroupData = []; // ScatterPlot에 넘길 groupData
   if (comparisonMode === "GroupvsGroup") {
-    console.log("mentalHealthGroup1")
-    console.log(mentalHealthGroup1)
     const group1Filtered = filterDataByMentalHealth(mentalHealthGroup1);
     const group2Filtered = filterDataByMentalHealth(mentalHealthGroup2);
     const group1Data = preparePlotData(group1Filtered, selectedFeatures);
     const group2Data = preparePlotData(group2Filtered, selectedFeatures);
     scatterGroupData = [
-      { data: group1Data, color: 'steelblue' },
-      { data: group2Data, color: 'black' }
+      { data: group1Data, color: 'steelblue', groupId: 'group1' },
+      { data: group2Data, color: 'orange', groupId: 'group2' }
     ];
   } else if (comparisonMode === "OnevsGroup") {
     const groupFiltered = filterDataByMentalHealth(mentalHealthGroup1); // 그룹1 역할 재사용 혹은 mentalHealth를 그룹조건으로 활용
@@ -338,9 +336,8 @@ const Dashboard = () => {
       }
     }
     scatterGroupData = [
-      { data: groupData, color: 'steelblue' },
-      // 나의 데이터: 큰 빨간 점 표시를 위해 radius 정보 추가
-      { data: myData, color: 'red', radius: 10 }
+      { data: groupData, color: 'steelblue', groupId: 'group' },
+      { data: myData, color: 'red', radius: 10, groupId: 'my' }
     ];
   } else if (comparisonMode === "OnevsOne") {
     const myStudent = data[myStudentId];
@@ -788,7 +785,7 @@ const Dashboard = () => {
                     >
                       {/* 제목 제거 → HistogramPlot */}
                       <Box sx={{ flex: 1, position: "relative" }}>
-                        <HistogramPlot brushedData={brushedPoints} myValue={myPointX}/>
+                        <HistogramPlot brushedData={brushedPoints} myValue={myPointX} comparisonMode={comparisonMode}/>
                       </Box>
                     </Paper>
                   </Grid>

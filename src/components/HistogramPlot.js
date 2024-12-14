@@ -1,8 +1,7 @@
-// src/components/HistogramPlot.js
 import React, { useRef, useEffect } from "react";
 import * as d3 from "d3";
 
-const HistogramPlot = ({ brushedData, myValue }) => {
+const HistogramPlot = ({ brushedData, myValue, comparisonMode }) => {
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -20,56 +19,89 @@ const HistogramPlot = ({ brushedData, myValue }) => {
       // brushedData가 없으면 표시하지 않음
       return;
     }
-    // x, y 둘 중 하나만 히스토그램 할지? 가령 x값 분포만 보겠다
-    // 또는 x와 y를 모두 히스토그램 2개로 그릴 수도 있음
-    // 예시에선 x값 분포를 히스토그램으로 표시
-    const values = brushedData.map((d) => d.x);
+
+    // GroupvsGroup 모드일 때 그룹별로 데이터 나누기
+    let groups = [];
+    if (comparisonMode === "GroupvsGroup") {
+      const group1Data = brushedData.filter(d => d.groupId === 'group1');
+      const group2Data = brushedData.filter(d => d.groupId === 'group2');
+      console.log("brushedData")
+      console.log(brushedData)
+      groups = [
+        {id: 'group1', color: 'steelblue', values: group1Data.map(d=>d.x)},
+        {id: 'group2', color: 'orange', values: group2Data.map(d=>d.x)}
+      ];
+    } else {
+      // 그 외 모드는 단일 데이터셋(전체 brushedData) 기준
+      groups = [
+        {id: 'all', color: 'steelblue', values: brushedData.map(d=>d.x)}
+      ];
+    }
+
+    // 전체 값 domain 계산(모든 그룹 값 통합)
+    const allValues = groups.flatMap(g => g.values);
 
     const xScale = d3
       .scaleLinear()
-      .domain(d3.extent(values))
+      .domain(d3.extent(allValues))
       .nice()
       .range([margin, margin + innerWidth]);
 
-    const bins = d3.histogram().domain(xScale.domain()).thresholds(20)(values);
+    // 각 그룹별로 bin 계산
+    // bins을 그룹별로 다르게 계산할 수도 있지만,
+    // 동일한 bin 경계를 사용하려면 하나의 threshold 공유
+    const binsGenerator = d3.histogram()
+      .domain(xScale.domain())
+      .thresholds(20);
 
+    // 각 그룹에 대해 bin 계산
+    groups.forEach(g => {
+      g.bins = binsGenerator(g.values);
+    });
+
+    // Y 스케일은 모든 그룹의 bin 최대 높이 기준
+    const maxCount = d3.max(groups.flatMap(g => g.bins.map(bin => bin.length)));
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(bins, (d) => d.length)])
+      .domain([0, maxCount])
       .nice()
       .range([margin + innerHeight, margin]);
 
     // X축
     const xAxis = d3.axisBottom(xScale);
-
     svg
       .append("g")
       .attr("transform", `translate(0, ${margin + innerHeight})`)
       .call(xAxis);
 
     // Y축
-    const yAxis = d3.axisLeft(yScale).ticks(
-      Math.min(
-        d3.max(bins, (d) => d.length),
-        10
-      )
-    );
-
+    const yAxis = d3.axisLeft(yScale).ticks(Math.min(maxCount, 10));
     svg.append("g").attr("transform", `translate(${margin}, 0)`).call(yAxis);
 
-    // 히스토그램 막대
-    svg
-      .selectAll("rect")
-      .data(bins)
-      .enter()
-      .append("rect")
-      .attr("x", (d) => xScale(d.x0))
-      .attr("y", (d) => yScale(d.length))
-      .attr("width", (d) => Math.max(0, xScale(d.x1) - xScale(d.x0) - 1))
-      .attr("height", (d) => margin + innerHeight - yScale(d.length))
-      .attr("fill", "steelblue")
-      .attr("opacity", 0.7);
+    // 히스토그램 막대 그리기
+    // 그룹이 2개 이상이면 오버레이 형태로 그려보자.
+    // 각 bin.x0, bin.x1 은 동일하므로 같은 위치에 다른 색의 막대가 겹친다.
+    // 투명도를 조절하거나 폭을 약간 조정해서 옆으로 밀 수도 있다.
+    const barWidthAdjust = groups.length > 1 ? 0.4 : 0; 
+    // group index에 따라 막대를 좌우로 약간 밀어내기
+    groups.forEach((g, i) => {
+      svg.selectAll(`rect.${g.id}`)
+        .data(g.bins)
+        .enter()
+        .append("rect")
+        .attr("class", g.id)
+        .attr("x", (d) => xScale(d.x0) + (i * barWidthAdjust))
+        .attr("y", (d) => yScale(d.length))
+        .attr("width", (d) => {
+          const w = xScale(d.x1) - xScale(d.x0) - 1;
+          return Math.max(0, w - barWidthAdjust * (groups.length - 1));
+        })
+        .attr("height", (d) => margin + innerHeight - yScale(d.length))
+        .attr("fill", g.color)
+        .attr("opacity", 0.5); // 그룹별로 다른 불투명도
+    });
 
+    // 나의 위치 표시
     if (myValue != null) {
       const lineX = xScale(myValue);
       if (!isNaN(lineX)) {
@@ -83,7 +115,7 @@ const HistogramPlot = ({ brushedData, myValue }) => {
           .attr("opacity", 0.9);
       }
     }
-  }, [brushedData]);
+  }, [brushedData, myValue, comparisonMode]);
 
   return <svg ref={svgRef} />;
 };
