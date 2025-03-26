@@ -23,23 +23,27 @@ const HistogramPlot = ({ brushedData, myValue, comparisonMode }) => {
     // GroupvsGroup 모드일 때 그룹별로 데이터 나누기
     let groups = [];
     if (comparisonMode === "GroupvsGroup") {
-      const group1Data = brushedData.filter(d => d.groupId === 'group1');
-      const group2Data = brushedData.filter(d => d.groupId === 'group2');
-      console.log("brushedData")
-      console.log(brushedData)
+      const group1Data = brushedData.filter((d) => d.groupId === "Group 1");
+      const group2Data = brushedData.filter((d) => d.groupId === "Group 2");
+      console.log("brushedData");
+      console.log(brushedData);
       groups = [
-        {id: 'group1', color: 'steelblue', values: group1Data.map(d=>d.x)},
-        {id: 'group2', color: 'orange', values: group2Data.map(d=>d.x)}
+        {
+          id: "group1",
+          color: "steelblue",
+          values: group1Data.map((d) => d.x),
+        },
+        { id: "group2", color: "orange", values: group2Data.map((d) => d.x) },
       ];
     } else {
       // 그 외 모드는 단일 데이터셋(전체 brushedData) 기준
       groups = [
-        {id: 'all', color: 'steelblue', values: brushedData.map(d=>d.x)}
+        { id: "all", color: "steelblue", values: brushedData.map((d) => d.x) },
       ];
     }
 
     // 전체 값 domain 계산(모든 그룹 값 통합)
-    const allValues = groups.flatMap(g => g.values);
+    const allValues = groups.flatMap((g) => g.values);
 
     const xScale = d3
       .scaleLinear()
@@ -50,17 +54,17 @@ const HistogramPlot = ({ brushedData, myValue, comparisonMode }) => {
     // 각 그룹별로 bin 계산
     // bins을 그룹별로 다르게 계산할 수도 있지만,
     // 동일한 bin 경계를 사용하려면 하나의 threshold 공유
-    const binsGenerator = d3.histogram()
-      .domain(xScale.domain())
-      .thresholds(20);
+    const binsGenerator = d3.histogram().domain(xScale.domain()).thresholds(20);
 
     // 각 그룹에 대해 bin 계산
-    groups.forEach(g => {
+    groups.forEach((g) => {
       g.bins = binsGenerator(g.values);
     });
 
     // Y 스케일은 모든 그룹의 bin 최대 높이 기준
-    const maxCount = d3.max(groups.flatMap(g => g.bins.map(bin => bin.length)));
+    const maxCount = d3.max(
+      groups.flatMap((g) => g.bins.map((bin) => bin.length))
+    );
     const yScale = d3
       .scaleLinear()
       .domain([0, maxCount])
@@ -82,15 +86,16 @@ const HistogramPlot = ({ brushedData, myValue, comparisonMode }) => {
     // 그룹이 2개 이상이면 오버레이 형태로 그려보자.
     // 각 bin.x0, bin.x1 은 동일하므로 같은 위치에 다른 색의 막대가 겹친다.
     // 투명도를 조절하거나 폭을 약간 조정해서 옆으로 밀 수도 있다.
-    const barWidthAdjust = groups.length > 1 ? 0.4 : 0; 
+    const barWidthAdjust = groups.length > 1 ? 0.4 : 0;
     // group index에 따라 막대를 좌우로 약간 밀어내기
     groups.forEach((g, i) => {
-      svg.selectAll(`rect.${g.id}`)
+      svg
+        .selectAll(`rect.${g.id}`)
         .data(g.bins)
         .enter()
         .append("rect")
         .attr("class", g.id)
-        .attr("x", (d) => xScale(d.x0) + (i * barWidthAdjust))
+        .attr("x", (d) => xScale(d.x0) + i * barWidthAdjust)
         .attr("y", (d) => yScale(d.length))
         .attr("width", (d) => {
           const w = xScale(d.x1) - xScale(d.x0) - 1;
@@ -105,7 +110,8 @@ const HistogramPlot = ({ brushedData, myValue, comparisonMode }) => {
     if (myValue != null) {
       const lineX = xScale(myValue);
       if (!isNaN(lineX)) {
-        svg.append("line")
+        svg
+          .append("line")
           .attr("x1", lineX)
           .attr("x2", lineX)
           .attr("y1", margin)

@@ -130,8 +130,7 @@ const FeatureSelectionMatrixModal = ({ open, onClose, groupData = [] }) => {
       <DialogTitle>Feature Selection (0 ~ 5)</DialogTitle>
       <DialogContent dividers>
         <Typography variant="body2" sx={{ mb: 2 }}>
-          원하는 Feature를 0개 이상 선택하세요. (체크된 병+비교모드 기준
-          groupData만 시각화)
+          Choose up to 5 features to generate a pairwise matrix.
         </Typography>
 
         {/* 체크박스 목록 */}
@@ -172,9 +171,9 @@ const FeatureSelectionMatrixModal = ({ open, onClose, groupData = [] }) => {
               </Typography>
             ) : (
               <>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                {/* <Typography variant="subtitle1" sx={{ mb: 1 }}>
                   선택된 {finalFeatures.length}개 Feature → Pairwise Matrix
-                </Typography>
+                </Typography> */}
                 <PairwiseScatterMatrix
                   groupData={groupData} // 필터링+색상 세팅된 데이터
                   featureList={finalFeatures}

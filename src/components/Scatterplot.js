@@ -87,7 +87,7 @@ const ScatterPlot = ({
       // 등고선 추가 (조건부)
       if (
         comparisonMode === "GroupvsGroup" || // 그룹 vs 그룹
-        (comparisonMode === "OnevsGroup" && group.groupId !== "my") // 개인 vs 그룹 (개인 제외)
+        (comparisonMode === "OnevsGroup" && group.groupId !== "User") // 개인 vs 그룹 (개인 제외)
       ) {
         const contourData = group.data.map((d) => [xScale(d.x), yScale(d.y)]);
         const density = d3

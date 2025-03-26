@@ -388,8 +388,8 @@ const Dashboard = () => {
     );
 
     scatterGroupData = [
-      { data: group1Data, color: "steelblue", groupId: "group1" },
-      { data: group2Data, color: "orange", groupId: "group2" },
+      { data: group1Data, color: "steelblue", groupId: "Group 1" },
+      { data: group2Data, color: "orange", groupId: "Group 2" },
     ];
   } else if (comparisonMode === "OnevsGroup") {
     const myStudent = data[myStudentId];
@@ -398,8 +398,8 @@ const Dashboard = () => {
       myData = preparePlotData([myStudent], selectedFeatures, mentalHealth);
     }
     scatterGroupData = [
-      { data: group1Data, color: "steelblue", groupId: "group" },
-      { data: myData, color: "red", radius: 10, groupId: "my" },
+      { data: group1Data, color: "steelblue", groupId: "Group" },
+      { data: myData, color: "red", radius: 10, groupId: "User" },
     ];
   } else if (comparisonMode === "OnevsOne") {
     const myStudent = data[myStudentId];
@@ -419,7 +419,7 @@ const Dashboard = () => {
       }
     }
     scatterGroupData = [
-      { data: myData, color: "red", radius: 10, groupId: "my" },
+      { data: myData, color: "red", radius: 10, groupId: "User" },
       { data: targetData, color: "steelblue", groupId: "target" },
     ];
   }
@@ -436,7 +436,7 @@ const Dashboard = () => {
       featureSelectionModalData.push({
         data: [myStudent],
         color: "red",
-        groupId: "my",
+        groupId: "User",
       });
     }
     featureSelectionModalData.push({
@@ -450,7 +450,7 @@ const Dashboard = () => {
       featureSelectionModalData.push({
         data: [myStudent],
         color: "red",
-        groupId: "my",
+        groupId: "User",
       });
     }
     // 선택된 n번째 타겟
@@ -545,17 +545,17 @@ const Dashboard = () => {
                           <FormControlLabel
                             value="OnevsOne"
                             control={<Radio />}
-                            label="개인 vs 개인"
+                            label="Individual vs Individual"
                           />
                           <FormControlLabel
                             value="OnevsGroup"
                             control={<Radio />}
-                            label="개인 vs 그룹"
+                            label="Individual vs Group"
                           />
                           <FormControlLabel
                             value="GroupvsGroup"
                             control={<Radio />}
-                            label="그룹 vs 그룹"
+                            label="Group vs Group"
                           />
                         </RadioGroup>
                       </FormControl>
@@ -567,7 +567,7 @@ const Dashboard = () => {
                     <>
                       <Grid item xs={3} sx={{ height: "100%" }}>
                         <MentalHealthSection
-                          title="나"
+                          title="User's Mental Health Assessment"
                           conditions={MENTAL_HEALTH_CONDITIONS}
                           onChange={() => {}}
                           values={mentalHealth}
@@ -601,7 +601,7 @@ const Dashboard = () => {
                               variant="h6"
                               sx={{ m: 0, fontWeight: "bold" }}
                             >
-                              대상 선택
+                              Choosing the target
                             </Typography>
                           </Box>
                           <Box sx={{ overflowY: "auto", flex: 1 }}>
@@ -609,11 +609,11 @@ const Dashboard = () => {
                               type="number"
                               value={customTarget}
                               onChange={handleCustomTargetChange}
-                              label={`1~${
+                              label={`Choose between 1~${
                                 group2Filtered.length || 1
-                              } 사이의 숫자`}
+                              }`}
                               fullWidth
-                              sx={{ mb: 2 }}
+                              sx={{ mt: 2, mb: 2 }}
                             />
                             <Box
                               sx={{
@@ -627,20 +627,20 @@ const Dashboard = () => {
                                 onClick={handleConfirmTarget}
                                 size="small"
                               >
-                                확인
+                                Confirm
                               </Button>
                             </Box>
-                            {savedTarget && (
+                            {/* {savedTarget && (
                               <Typography variant="body2" sx={{ mt: 2 }}>
                                 선택된 대상: {savedTarget}
                               </Typography>
-                            )}
+                            )} */}
                           </Box>
                         </Paper>
                       </Grid>
                       <Grid item xs={3} sx={{ height: "100%" }}>
                         <MentalHealthSection
-                          title="대상자"
+                          title="Other's Mental Health Assessment"
                           conditions={MENTAL_HEALTH_CONDITIONS}
                           onChange={handleGroup2Change}
                           values={mentalHealthGroup2}
@@ -653,7 +653,7 @@ const Dashboard = () => {
                     <>
                       <Grid item xs={5} sx={{ height: "100%" }}>
                         <MentalHealthSection
-                          title="나"
+                          title="User's Mental Health Assessment"
                           conditions={MENTAL_HEALTH_CONDITIONS}
                           onChange={() => {}}
                           values={mentalHealth}
