@@ -662,7 +662,7 @@ const Dashboard = () => {
                       </Grid>
                       <Grid item xs={5} sx={{ height: "100%" }}>
                         <MentalHealthSection
-                          title="그룹"
+                          title="Group 1"
                           conditions={MENTAL_HEALTH_CONDITIONS}
                           onChange={handleGroup1Change}
                           values={mentalHealthGroup1}
@@ -675,7 +675,7 @@ const Dashboard = () => {
                     <>
                       <Grid item xs={5} sx={{ height: "100%" }}>
                         <MentalHealthSection
-                          title="그룹1"
+                          title="Group 1"
                           conditions={MENTAL_HEALTH_CONDITIONS}
                           onChange={handleGroup1Change}
                           values={mentalHealthGroup1}
@@ -683,7 +683,7 @@ const Dashboard = () => {
                       </Grid>
                       <Grid item xs={5} sx={{ height: "100%" }}>
                         <MentalHealthSection
-                          title="그룹2"
+                          title="Group 2"
                           conditions={MENTAL_HEALTH_CONDITIONS}
                           onChange={handleGroup2Change}
                           values={mentalHealthGroup2}
@@ -879,7 +879,7 @@ const Dashboard = () => {
           {/* 결과 저장 버튼 */}
           <Box sx={{ mt: 4, textAlign: "right" }}>
             <Button variant="contained" onClick={handleSaveResults}>
-              결과 저장
+              Save
             </Button>
           </Box>
         </Box>
